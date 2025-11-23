@@ -285,23 +285,6 @@ For large numbers of requests:
 └───────────┴─────────────────────────────────────────────┘
 ```
 
-## Open Questions
-
-1. ~~**Scope**: Should one component show one exchange or multiple?~~ → Split into two components
-2. ~~**Timing**: Display request timing/duration?~~ → Yes, required for waterfall
-3. **WebSocket**: Support beyond HTTP request/response? → Future phase
-4. **Privacy**: Filter sensitive headers (Authorization)? → Add sanitize option
-5. **HAR Format**: Import/export HAR for compatibility with other tools?
-6. **Performance**: Virtual scrolling needed for 100+ requests?
-
-## Next Steps
-
-1. Build Phase 1: `http-console` MVP with manual data
-2. Build Phase 2: `http-waterfall` list view
-3. Build Phase 3: Waterfall timeline visualization
-4. Test with sample tutorial content (multiple API calls)
-5. Evaluate capture mechanism needs
-6. Iterate based on teaching use cases
 
 ## Sample Usage in Tutorial
 
@@ -331,4 +314,11 @@ For large numbers of requests:
 
 ---
 
-Ready to prototype Phase 1 (`http-console`) and Phase 2 (basic `http-waterfall` list)?
+## Future Possibilities
+
+1. **WebSocket**: Support beyond HTTP request/response? → Future phase
+2. **Privacy**: Filter sensitive headers (Authorization)? → Add sanitize option
+3. **HAR Format Support**: Import/export HAR for compatibility with other tools?
+4. **Performance Improvements**: Virtual scrolling needed for 100+ requests?
+
+
