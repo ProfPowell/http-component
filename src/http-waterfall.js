@@ -304,11 +304,14 @@ class HTTPWaterfallElement extends HTMLElement {
     if (this._interceptor) return; // Already capturing
 
     this._interceptor = new HTTPInterceptor();
-    this._interceptor.start((exchange) => {
-      this.addCapturedExchange(exchange);
-    }, {
-      filter: this._filter
-    });
+    this._interceptor.start(
+      exchange => {
+        this.addCapturedExchange(exchange);
+      },
+      {
+        filter: this._filter,
+      }
+    );
   }
 
   /**
@@ -354,9 +357,7 @@ class HTTPWaterfallElement extends HTMLElement {
   areRequestsClustered() {
     if (this._exchanges.length < 2) return false;
 
-    const times = this._exchanges
-      .map(e => e.timing?.startTime || 0)
-      .filter(t => t > 0);
+    const times = this._exchanges.map(e => e.timing?.startTime || 0).filter(t => t > 0);
 
     if (times.length === 0) return false;
 
@@ -364,7 +365,7 @@ class HTTPWaterfallElement extends HTMLElement {
     const max = Math.max(...times);
 
     // Clustered if all requests within 10 seconds
-    return (max - min) < 10000;
+    return max - min < 10000;
   }
 
   /**
@@ -442,7 +443,8 @@ class HTTPWaterfallElement extends HTMLElement {
   renderToolbar() {
     if (!this._toolbarContainer) return;
 
-    const captureControls = this._capture ? `
+    const captureControls = this._capture
+      ? `
       <div class="capture-controls">
         <button class="control-btn pause-btn" title="${this._isPaused ? 'Resume' : 'Pause'}">
           ${this._isPaused ? '▶' : '⏸'}
@@ -454,7 +456,8 @@ class HTTPWaterfallElement extends HTMLElement {
           ${this._isPaused ? 'Paused' : 'Capturing'}
         </span>
       </div>
-    ` : '';
+    `
+      : '';
 
     this._toolbarContainer.innerHTML = `
       <div class="toolbar">
@@ -564,9 +567,9 @@ class HTTPWaterfallElement extends HTMLElement {
           <div class="duration-scale-header">Duration</div>
         </div>
         <div class="duration-rows">
-          ${this._exchanges.map((exchange, index) =>
-            this.renderDurationRow(exchange, index, maxDuration)
-          ).join('')}
+          ${this._exchanges
+            .map((exchange, index) => this.renderDurationRow(exchange, index, maxDuration))
+            .join('')}
         </div>
       </div>
     `;
@@ -611,9 +614,7 @@ class HTTPWaterfallElement extends HTMLElement {
   getMaxDuration() {
     if (this._exchanges.length === 0) return 0;
 
-    const durations = this._exchanges
-      .map(e => e.timing?.duration || 0)
-      .filter(d => d > 0);
+    const durations = this._exchanges.map(e => e.timing?.duration || 0).filter(d => d > 0);
 
     return durations.length > 0 ? Math.max(...durations) : 0;
   }
@@ -639,9 +640,11 @@ class HTTPWaterfallElement extends HTMLElement {
       <div class="waterfall-view">
         ${this.renderTimelineHeader(totalDuration)}
         <div class="waterfall-rows">
-          ${this._exchanges.map((exchange, index) =>
-            this.renderWaterfallRow(exchange, index, baseTime, totalDuration)
-          ).join('')}
+          ${this._exchanges
+            .map((exchange, index) =>
+              this.renderWaterfallRow(exchange, index, baseTime, totalDuration)
+            )
+            .join('')}
         </div>
       </div>
     `;
@@ -782,7 +785,7 @@ class HTTPWaterfallElement extends HTMLElement {
     // Expand/collapse buttons (only in list view)
     const expandBtns = this.shadowRoot.querySelectorAll('.expand-btn');
     expandBtns.forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', e => {
         e.stopPropagation();
         const index = parseInt(btn.dataset.index, 10);
         this.toggleRow(index);

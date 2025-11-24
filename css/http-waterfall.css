@@ -57,7 +57,7 @@
 }
 
 /* Dark mode */
-:host([theme="dark"]) {
+:host([theme='dark']) {
   --bg-primary: #111827;
   --bg-secondary: #1f2937;
   --bg-tertiary: #374151;
@@ -209,7 +209,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -549,11 +550,21 @@
   white-space: nowrap;
 }
 
-.time-marker:nth-child(1) { left: 16px; }
-.time-marker:nth-child(2) { left: 20%; }
-.time-marker:nth-child(3) { left: 40%; }
-.time-marker:nth-child(4) { left: 60%; }
-.time-marker:nth-child(5) { left: 80%; }
+.time-marker:nth-child(1) {
+  left: 16px;
+}
+.time-marker:nth-child(2) {
+  left: 20%;
+}
+.time-marker:nth-child(3) {
+  left: 40%;
+}
+.time-marker:nth-child(4) {
+  left: 60%;
+}
+.time-marker:nth-child(5) {
+  left: 80%;
+}
 
 .waterfall-rows {
   display: flex;

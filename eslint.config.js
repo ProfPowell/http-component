@@ -29,10 +29,13 @@ export default [
     },
     rules: {
       // Possible Errors
-      'no-unused-vars': ['warn', {
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_'
-      }],
+      'no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
       'no-undef': 'error',
       'no-unreachable': 'error',
       'no-constant-condition': 'warn',
@@ -41,15 +44,15 @@ export default [
       'no-eval': 'error',
       'no-implied-eval': 'error',
       'no-with': 'error',
-      'eqeqeq': ['warn', 'always', { null: 'ignore' }],
+      eqeqeq: ['warn', 'always', { null: 'ignore' }],
       'no-var': 'warn',
       'prefer-const': 'warn',
 
       // Style (minimal, just obvious issues)
       'no-multiple-empty-lines': ['warn', { max: 2 }],
       'no-trailing-spaces': 'warn',
-      'semi': ['warn', 'always'],
-      'quotes': ['warn', 'single', { avoidEscape: true }],
+      semi: ['warn', 'always'],
+      quotes: ['warn', 'single', { avoidEscape: true }],
     },
   },
 ];
