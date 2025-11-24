@@ -123,7 +123,7 @@ describe('HTTPInterceptor', () => {
       const interceptor = new HTTPInterceptor();
       const headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer token'
+        Authorization: 'Bearer token',
       };
 
       const result = interceptor.extractHeaders(headers);

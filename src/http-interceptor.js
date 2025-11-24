@@ -184,7 +184,7 @@ export class HTTPInterceptor {
     this.originalFetch = window.fetch;
     const interceptor = this;
 
-    window.fetch = function(...args) {
+    window.fetch = function (...args) {
       const startTime = performance.now();
       const [resource, init = {}] = args;
 
@@ -197,10 +197,11 @@ export class HTTPInterceptor {
         url: url,
         httpVersion: 'HTTP/1.1',
         headers: interceptor.extractHeaders(init.headers),
-        body: init.body || null
+        body: init.body || null,
       };
 
-      return interceptor.originalFetch.apply(this, args)
+      return interceptor.originalFetch
+        .apply(this, args)
         .then(async response => {
           const endTime = performance.now();
 
@@ -218,8 +219,8 @@ export class HTTPInterceptor {
               timing: {
                 startTime,
                 endTime,
-                duration: Math.round(endTime - startTime)
-              }
+                duration: Math.round(endTime - startTime),
+              },
             };
 
             interceptor.notifyListeners(exchange);
@@ -240,13 +241,13 @@ export class HTTPInterceptor {
               statusText: 'Network Error',
               httpVersion: 'HTTP/1.1',
               headers: {},
-              body: JSON.stringify({ error: error.message })
+              body: JSON.stringify({ error: error.message }),
             },
             timing: {
               startTime,
               endTime,
-              duration: Math.round(endTime - startTime)
-            }
+              duration: Math.round(endTime - startTime),
+            },
           };
 
           interceptor.notifyListeners(exchange);
@@ -265,21 +266,21 @@ export class HTTPInterceptor {
     this.originalXHR = window.XMLHttpRequest;
     const interceptor = this;
 
-    window.XMLHttpRequest = function() {
+    window.XMLHttpRequest = function () {
       const xhr = new interceptor.originalXHR();
       const requestData = {
         method: 'GET',
         url: '',
         httpVersion: 'HTTP/1.1',
         headers: {},
-        body: null
+        body: null,
       };
 
       let startTime = 0;
 
       // Override open
       const originalOpen = xhr.open;
-      xhr.open = function(method, url, ...args) {
+      xhr.open = function (method, url, ...args) {
         requestData.method = method;
         requestData.url = url;
         return originalOpen.apply(this, [method, url, ...args]);
@@ -287,19 +288,19 @@ export class HTTPInterceptor {
 
       // Override setRequestHeader
       const originalSetRequestHeader = xhr.setRequestHeader;
-      xhr.setRequestHeader = function(name, value) {
+      xhr.setRequestHeader = function (name, value) {
         requestData.headers[name] = value;
         return originalSetRequestHeader.apply(this, arguments);
       };
 
       // Override send
       const originalSend = xhr.send;
-      xhr.send = function(body) {
+      xhr.send = function (body) {
         requestData.body = body || null;
         startTime = performance.now();
 
         // Listen for completion
-        xhr.addEventListener('loadend', function() {
+        xhr.addEventListener('loadend', function () {
           const endTime = performance.now();
 
           // Extract response headers
@@ -322,13 +323,16 @@ export class HTTPInterceptor {
               statusText: xhr.statusText,
               httpVersion: 'HTTP/1.1',
               headers: responseHeaders,
-              body: interceptor.truncateBody(xhr.responseText, xhr.getResponseHeader('Content-Type'))
+              body: interceptor.truncateBody(
+                xhr.responseText,
+                xhr.getResponseHeader('Content-Type')
+              ),
             },
             timing: {
               startTime,
               endTime,
-              duration: Math.round(endTime - startTime)
-            }
+              duration: Math.round(endTime - startTime),
+            },
           };
 
           interceptor.notifyListeners(exchange);
@@ -383,7 +387,7 @@ export class HTTPInterceptor {
       statusText: response.statusText,
       httpVersion: 'HTTP/1.1',
       headers,
-      body
+      body,
     };
   }
 

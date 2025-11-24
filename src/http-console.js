@@ -531,7 +531,7 @@ class HTTPConsoleElement extends HTMLElement {
     try {
       return {
         request: requestAttr ? JSON.parse(requestAttr) : null,
-        response: responseAttr ? JSON.parse(responseAttr) : null
+        response: responseAttr ? JSON.parse(responseAttr) : null,
       };
     } catch (e) {
       console.error('Failed to parse HTTP data:', e);
@@ -688,7 +688,10 @@ class HTTPConsoleElement extends HTMLElement {
     // Split on semicolon to separate media type from parameters
     const parts = escaped.split(';');
     const mediaType = parts[0].trim();
-    const params = parts.slice(1).map(p => p.trim()).join('; ');
+    const params = parts
+      .slice(1)
+      .map(p => p.trim())
+      .join('; ');
 
     let result = `<span class="mime-type">${mediaType}</span>`;
     if (params) {
@@ -718,8 +721,13 @@ class HTTPConsoleElement extends HTMLElement {
    */
   isBinaryContentType(contentType) {
     const binaryTypes = [
-      'image/', 'video/', 'audio/', 'application/octet-stream',
-      'application/pdf', 'application/zip', 'font/'
+      'image/',
+      'video/',
+      'audio/',
+      'application/octet-stream',
+      'application/pdf',
+      'application/zip',
+      'font/',
     ];
     return binaryTypes.some(type => contentType.includes(type));
   }
@@ -742,9 +750,12 @@ class HTTPConsoleElement extends HTMLElement {
     // Binary data
     if (this.isBinaryContentType(contentType)) {
       const size = bodyStr.length;
-      const sizeStr = size < 1024 ? `${size} bytes`
-        : size < 1024 * 1024 ? `${(size / 1024).toFixed(1)} KB`
-        : `${(size / (1024 * 1024)).toFixed(1)} MB`;
+      const sizeStr =
+        size < 1024
+          ? `${size} bytes`
+          : size < 1024 * 1024
+            ? `${(size / 1024).toFixed(1)} KB`
+            : `${(size / (1024 * 1024)).toFixed(1)} MB`;
       return `<span class="binary-data">📦 Binary data (${this.escapeHtml(contentType.split(';')[0])}, ${sizeStr})</span>`;
     }
 
@@ -809,9 +820,9 @@ class HTTPConsoleElement extends HTMLElement {
     if (Array.isArray(obj)) {
       if (obj.length === 0) return '[]';
 
-      const items = obj.map(item =>
-        `${nextIndent}${this.formatJson(item, indent + 1)}`
-      ).join(',\n');
+      const items = obj
+        .map(item => `${nextIndent}${this.formatJson(item, indent + 1)}`)
+        .join(',\n');
 
       return `[\n${items}\n${indentStr}]`;
     }
@@ -820,9 +831,12 @@ class HTTPConsoleElement extends HTMLElement {
       const keys = Object.keys(obj);
       if (keys.length === 0) return '{}';
 
-      const items = keys.map(key =>
-        `${nextIndent}<span class="json-key">"${this.escapeHtml(key)}"</span>: ${this.formatJson(obj[key], indent + 1)}`
-      ).join(',\n');
+      const items = keys
+        .map(
+          key =>
+            `${nextIndent}<span class="json-key">"${this.escapeHtml(key)}"</span>: ${this.formatJson(obj[key], indent + 1)}`
+        )
+        .join(',\n');
 
       return `{\n${items}\n${indentStr}}`;
     }
@@ -838,16 +852,23 @@ class HTTPConsoleElement extends HTMLElement {
    * @private
    */
   highlightHtml(html) {
-    return html
-      // HTML comments
-      .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="html-comment">$1</span>')
-      // Tags with attributes
-      .replace(/(&lt;\/?)([\w-]+)((?:\s+[\w-]+=(?:"[^"]*"|'[^']*'))*\s*)(\/?&gt;)/g, (match, open, tag, attrs, close) => {
-        const highlightedTag = `<span class="html-tag">${open}${tag}</span>`;
-        const highlightedAttrs = attrs.replace(/([\w-]+)=(["'])([^"']*)\2/g,
-          '<span class="html-attr">$1</span>=<span class="html-value">$2$3$2</span>');
-        return highlightedTag + highlightedAttrs + `<span class="html-tag">${close}</span>`;
-      });
+    return (
+      html
+        // HTML comments
+        .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="html-comment">$1</span>')
+        // Tags with attributes
+        .replace(
+          /(&lt;\/?)([\w-]+)((?:\s+[\w-]+=(?:"[^"]*"|'[^']*'))*\s*)(\/?&gt;)/g,
+          (match, open, tag, attrs, close) => {
+            const highlightedTag = `<span class="html-tag">${open}${tag}</span>`;
+            const highlightedAttrs = attrs.replace(
+              /([\w-]+)=(["'])([^"']*)\2/g,
+              '<span class="html-attr">$1</span>=<span class="html-value">$2$3$2</span>'
+            );
+            return highlightedTag + highlightedAttrs + `<span class="html-tag">${close}</span>`;
+          }
+        )
+    );
   }
 
   /**
@@ -858,19 +879,21 @@ class HTTPConsoleElement extends HTMLElement {
    * @private
    */
   highlightCss(css) {
-    return css
-      // Comments
-      .replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="css-comment">$1</span>')
-      // Selectors (before {)
-      .replace(/^([^{}/]+)(\s*{)/gm, (match, selector, brace) => {
-        return `<span class="css-selector">${selector}</span>${brace}`;
-      })
-      // Properties
-      .replace(/\b([\w-]+)(\s*):/g, '<span class="css-property">$1</span>$2:')
-      // Values (after : and before ;)
-      .replace(/:\s*([^;}\n]+)/g, (match, value) => {
-        return ': <span class="css-value">' + value + '</span>';
-      });
+    return (
+      css
+        // Comments
+        .replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="css-comment">$1</span>')
+        // Selectors (before {)
+        .replace(/^([^{}/]+)(\s*{)/gm, (match, selector, brace) => {
+          return `<span class="css-selector">${selector}</span>${brace}`;
+        })
+        // Properties
+        .replace(/\b([\w-]+)(\s*):/g, '<span class="css-property">$1</span>$2:')
+        // Values (after : and before ;)
+        .replace(/:\s*([^;}\n]+)/g, (match, value) => {
+          return ': <span class="css-value">' + value + '</span>';
+        })
+    );
   }
 
   /**
@@ -886,19 +909,19 @@ class HTTPConsoleElement extends HTMLElement {
     let result = js;
 
     // 1. Replace strings first (most specific)
-    result = result.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/g, (match) => {
+    result = result.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/g, match => {
       const id = placeholders.length;
       placeholders.push(`<span class="js-string">${match}</span>`);
       return `___PLACEHOLDER_${id}___`;
     });
 
     // 2. Replace comments
-    result = result.replace(/\/\/.*$/gm, (match) => {
+    result = result.replace(/\/\/.*$/gm, match => {
       const id = placeholders.length;
       placeholders.push(`<span class="js-comment">${match}</span>`);
       return `___PLACEHOLDER_${id}___`;
     });
-    result = result.replace(/\/\*[\s\S]*?\*\//g, (match) => {
+    result = result.replace(/\/\*[\s\S]*?\*\//g, match => {
       const id = placeholders.length;
       placeholders.push(`<span class="js-comment">${match}</span>`);
       return `___PLACEHOLDER_${id}___`;
@@ -908,7 +931,8 @@ class HTTPConsoleElement extends HTMLElement {
     result = result.replace(/\b(\d+\.?\d*)\b/g, '<span class="js-number">$1</span>');
 
     // 4. Replace keywords
-    const keywords = /\b(function|const|let|var|if|else|for|while|return|class|import|export|from|async|await|try|catch|throw|new|this|typeof|instanceof)\b/g;
+    const keywords =
+      /\b(function|const|let|var|if|else|for|while|return|class|import|export|from|async|await|try|catch|throw|new|this|typeof|instanceof)\b/g;
     result = result.replace(keywords, '<span class="js-keyword">$1</span>');
 
     // 5. Restore placeholders
