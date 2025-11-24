@@ -3,19 +3,52 @@
   "version": "0.1.0",
   "description": "Dependency-free vanilla web components for displaying HTTP request/response data",
   "type": "module",
+  "main": "./src/http-console.js",
+  "module": "./src/http-console.js",
+  "exports": {
+    ".": "./src/http-console.js",
+    "./http-console": "./src/http-console.js",
+    "./http-waterfall": "./src/http-waterfall.js",
+    "./http-interceptor": "./src/http-interceptor.js"
+  },
+  "files": [
+    "src",
+    "demo",
+    "README.md",
+    "LICENSE",
+    "CLAUDE.md"
+  ],
   "scripts": {
     "dev": "http-server -p 8081 -c-1 -o /demo",
-    "start": "npm run dev"
+    "start": "npm run dev",
+    "test": "node --test test/*.test.js",
+    "test:watch": "node --test --watch test/*.test.js"
   },
   "keywords": [
     "web-components",
     "http",
     "console",
-    "educational"
+    "educational",
+    "debugging",
+    "devtools",
+    "network",
+    "waterfall",
+    "http-viewer"
   ],
   "author": "",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ProfPowell/http-component.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ProfPowell/http-component/issues"
+  },
+  "homepage": "https://github.com/ProfPowell/http-component#readme",
   "devDependencies": {
     "http-server": "^14.1.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

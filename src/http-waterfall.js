@@ -2,8 +2,131 @@ import { HTTPInterceptor } from './http-interceptor.js';
 import './http-console.js';
 
 /**
+ * Inline CSS styles for http-waterfall component
+ * @const {string}
+ */
+const HTTP_WATERFALL_STYLES = `/** HTTP Waterfall Component Styles */
+:host { display: block; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; --bg-primary: white; --bg-secondary: #f9fafb; --bg-tertiary: #fafafa; --bg-expanded: #f3f4f6; --border-color: #e5e7eb; --text-primary: #374151; --text-secondary: #6b7280; --text-tertiary: #9ca3af; --button-bg: white; --button-border: #d1d5db; --button-hover-bg: #f3f4f6; --button-hover-border: #9ca3af; --button-active-bg: #e5e7eb; --button-primary-bg: #2563eb; --button-primary-border: #2563eb; --button-primary-hover: #1d4ed8; --status-success-bg: #dcfce7; --status-success-text: #166534; --status-redirect-bg: #e0e7ff; --status-redirect-text: #3730a3; --status-client-error-bg: #fef3c7; --status-client-error-text: #92400e; --status-server-error-bg: #fee2e2; --status-server-error-text: #991b1b; --timing-success-bg: #86efac; --timing-success-border: #22c55e; --timing-redirect-bg: #a5b4fc; --timing-redirect-border: #6366f1; --timing-client-error-bg: #fde047; --timing-client-error-border: #eab308; --timing-server-error-bg: #fca5a5; --timing-server-error-border: #ef4444; --capture-active-bg: #dcfce7; --capture-active-text: #166534; --capture-active-dot: #22c55e; --capture-paused-bg: #fef3c7; --capture-paused-text: #92400e; }
+:host([theme="dark"]) { --bg-primary: #111827; --bg-secondary: #1f2937; --bg-tertiary: #374151; --bg-expanded: #4b5563; --border-color: #374151; --text-primary: #f3f4f6; --text-secondary: #9ca3af; --text-tertiary: #6b7280; --button-bg: #374151; --button-border: #4b5563; --button-hover-bg: #4b5563; --button-hover-border: #6b7280; --button-active-bg: #6b7280; --button-primary-bg: #3b82f6; --button-primary-border: #3b82f6; --button-primary-hover: #2563eb; --status-success-bg: #065f46; --status-success-text: #6ee7b7; --status-redirect-bg: #312e81; --status-redirect-text: #a5b4fc; --status-client-error-bg: #78350f; --status-client-error-text: #fde047; --status-server-error-bg: #7f1d1d; --status-server-error-text: #fca5a5; --timing-success-bg: #047857; --timing-success-border: #10b981; --timing-redirect-bg: #4338ca; --timing-redirect-border: #6366f1; --timing-client-error-bg: #b45309; --timing-client-error-border: #f59e0b; --timing-server-error-bg: #b91c1c; --timing-server-error-border: #ef4444; --capture-active-bg: #065f46; --capture-active-text: #6ee7b7; --capture-active-dot: #10b981; --capture-paused-bg: #78350f; --capture-paused-text: #fde047; }
+.http-waterfall { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 4px; overflow: hidden; }
+.toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 12px 16px; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); }
+.view-toggle { display: flex; gap: 4px; }
+.view-btn { padding: 6px 12px; border: 1px solid var(--button-border); background: var(--button-bg); color: var(--text-primary); font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 4px; transition: all 0.2s; }
+.view-btn:hover { background: var(--button-hover-bg); }
+.view-btn.active { background: var(--button-primary-bg); color: white; border-color: var(--button-primary-border); }
+.capture-controls { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.control-btn { padding: 6px 12px; border: 1px solid var(--button-border); background: var(--button-bg); color: var(--text-primary); font-size: 16px; cursor: pointer; border-radius: 4px; transition: all 0.2s; min-width: 36px; }
+.control-btn:hover { background: var(--button-hover-bg); border-color: var(--button-hover-border); }
+.control-btn:active { background: var(--button-active-bg); }
+.capture-indicator { font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 12px; display: flex; align-items: center; gap: 6px; }
+.capture-indicator.active { background: var(--capture-active-bg); color: var(--capture-active-text); }
+.capture-indicator.active::before { content: ''; display: inline-block; width: 8px; height: 8px; background: var(--capture-active-dot); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+.capture-indicator.paused { background: var(--capture-paused-bg); color: var(--capture-paused-text); }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+.info { font-size: 13px; color: var(--text-secondary); }
+.empty { padding: 40px 20px; text-align: center; color: var(--text-tertiary); font-style: italic; }
+.list-view { display: flex; flex-direction: column; }
+.exchange-row { border-bottom: 1px solid var(--border-color); }
+.exchange-row:last-child { border-bottom: none; }
+.exchange-summary { display: grid; grid-template-columns: 80px 1fr 140px 80px 80px 40px; gap: 12px; align-items: center; padding: 12px 16px; cursor: pointer; transition: background 0.2s; }
+.exchange-summary:hover { background: var(--bg-secondary); }
+.exchange-row.expanded .exchange-summary { background: var(--bg-expanded); border-bottom: 1px solid var(--border-color); }
+.method { font-weight: 600; font-family: 'Courier New', monospace; padding: 2px 8px; border-radius: 3px; text-align: center; font-size: 12px; }
+.method-get { background: var(--status-redirect-bg); color: var(--status-redirect-text); }
+.method-post { background: var(--status-success-bg); color: var(--status-success-text); }
+.method-put { background: var(--status-client-error-bg); color: var(--status-client-error-text); }
+.method-delete { background: var(--status-server-error-bg); color: var(--status-server-error-text); }
+.method-patch { background: var(--status-redirect-bg); color: var(--status-redirect-text); }
+.url { color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.status { font-family: 'Courier New', monospace; font-size: 13px; font-weight: 500; padding: 2px 8px; border-radius: 3px; text-align: center; }
+.status-success { background: var(--status-success-bg); color: var(--status-success-text); }
+.status-redirect { background: var(--status-redirect-bg); color: var(--status-redirect-text); }
+.status-client-error { background: var(--status-client-error-bg); color: var(--status-client-error-text); }
+.status-server-error { background: var(--status-server-error-bg); color: var(--status-server-error-text); }
+.size, .duration { font-family: 'Courier New', monospace; font-size: 13px; color: var(--text-secondary); text-align: right; }
+.expand-btn { background: none; border: none; color: var(--text-secondary); font-size: 14px; cursor: pointer; padding: 6px 8px; transition: all 0.2s; min-width: 32px; display: flex; align-items: center; justify-content: center; }
+.expand-btn:hover { color: var(--text-primary); background: var(--button-active-bg); border-radius: 4px; }
+.exchange-detail { padding: 16px; background: var(--bg-tertiary); border-top: 1px solid var(--border-color); }
+.detail-console-container { width: 100%; }
+.duration-view { display: flex; flex-direction: column; }
+.duration-header { display: grid; grid-template-columns: 300px 1fr; border-bottom: 2px solid var(--border-color); background: var(--bg-secondary); font-weight: 600; font-size: 12px; color: var(--text-secondary); padding: 8px 16px; min-height: 46px; align-items: start; }
+.duration-scale-header { padding-left: 16px; }
+.duration-rows { display: flex; flex-direction: column; }
+.duration-row-container { border-bottom: 1px solid var(--border-color); }
+.duration-row-container:last-child { border-bottom: none; }
+.duration-row-container.expanded { background: var(--bg-tertiary); }
+.duration-row { display: grid; grid-template-columns: 300px 1fr; min-height: 40px; transition: background 0.2s; }
+.duration-row:hover { background: var(--bg-secondary); cursor: pointer; }
+.duration-bar-area { position: relative; padding: 8px 16px; background: var(--bg-tertiary); overflow-x: auto; overflow-y: hidden; min-width: 0; }
+.duration-bar { height: 24px; border-radius: 3px; display: flex; align-items: center; padding: 0 8px; box-sizing: border-box; width: calc((var(--duration) / var(--max-duration)) * (100% - 32px)); min-width: 40px; max-width: calc(100% - 16px); }
+.duration-bar.status-success { background: var(--timing-success-bg); border: 1px solid var(--timing-success-border); }
+.duration-bar.status-redirect { background: var(--timing-redirect-bg); border: 1px solid var(--timing-redirect-border); }
+.duration-bar.status-client-error { background: var(--timing-client-error-bg); border: 1px solid var(--timing-client-error-border); }
+.duration-bar.status-server-error { background: var(--timing-server-error-bg); border: 1px solid var(--timing-server-error-border); }
+.waterfall-view { display: flex; flex-direction: column; }
+.timeline-header { display: grid; grid-template-columns: 300px 1fr; border-bottom: 2px solid var(--border-color); background: var(--bg-secondary); font-weight: 600; font-size: 12px; color: var(--text-secondary); min-height: 46px; align-items: start; }
+.request-info-header { padding: 8px 16px; border-right: 1px solid var(--border-color); }
+.timeline-scale { display: flex; position: relative; padding: 8px 16px; min-height: 30px; }
+.time-marker { position: absolute; font-size: 11px; color: var(--text-tertiary); white-space: nowrap; }
+.time-marker:nth-child(1) { left: 16px; }
+.time-marker:nth-child(2) { left: 20%; }
+.time-marker:nth-child(3) { left: 40%; }
+.time-marker:nth-child(4) { left: 60%; }
+.time-marker:nth-child(5) { left: 80%; }
+.waterfall-rows { display: flex; flex-direction: column; }
+.waterfall-row-container { border-bottom: 1px solid var(--border-color); }
+.waterfall-row-container:last-child { border-bottom: none; }
+.waterfall-row-container.expanded { background: var(--bg-tertiary); }
+.waterfall-row { display: grid; grid-template-columns: 300px 1fr; min-height: 40px; transition: background 0.2s; }
+.waterfall-row:hover { background: var(--bg-secondary); cursor: pointer; }
+.request-info { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-right: 1px solid var(--border-color); background: var(--bg-primary); }
+.url-short { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: var(--text-primary); }
+.timing-area { position: relative; padding: 8px 16px; background: var(--bg-tertiary); overflow-x: auto; overflow-y: hidden; min-width: 0; }
+.timing-bar { position: absolute; top: 50%; transform: translateY(-50%); height: 24px; border-radius: 3px; display: flex; align-items: center; padding: 0 8px; box-sizing: border-box; left: calc(16px + (var(--start-offset) / var(--total-duration)) * (100% - 32px)); width: calc((var(--duration) / var(--total-duration)) * (100% - 32px)); min-width: 2px; max-width: calc(100% - 32px); }
+.timing-bar.status-success { background: var(--timing-success-bg); border: 1px solid var(--timing-success-border); }
+.timing-bar.status-redirect { background: var(--timing-redirect-bg); border: 1px solid var(--timing-redirect-border); }
+.timing-bar.status-client-error { background: var(--timing-client-error-bg); border: 1px solid var(--timing-client-error-border); }
+.timing-bar.status-server-error { background: var(--timing-server-error-bg); border: 1px solid var(--timing-server-error-border); }
+.duration-label { font-size: 11px; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: clip; }
+@media (max-width: 900px) { .exchange-summary { grid-template-columns: 60px 1fr 100px 60px 60px 30px; gap: 8px; font-size: 13px; } .duration-row, .duration-header { grid-template-columns: 200px 1fr; } .waterfall-row, .timeline-header { grid-template-columns: 200px 1fr; } }
+`;
+
+/**
+ * @typedef {Object} HTTPTiming
+ * @property {number} startTime - Request start timestamp (milliseconds)
+ * @property {number} endTime - Request end timestamp (milliseconds)
+ * @property {number} duration - Request duration (milliseconds)
+ * @property {Object} [phases] - Optional detailed timing phases
+ */
+
+/**
+ * @typedef {Object} HTTPExchangeWithTiming
+ * @property {Object} request - HTTP request data
+ * @property {Object} response - HTTP response data
+ * @property {HTTPTiming} timing - Timing information
+ */
+
+/**
  * HTTPWaterfallElement - Web component for displaying multiple HTTP exchanges
- * Supports both list view and waterfall timeline view
+ * Supports list, duration, and waterfall timeline views with live capture capability
+ *
+ * @class
+ * @extends HTMLElement
+ *
+ * @example
+ * // Static data display
+ * const waterfall = document.querySelector('http-waterfall');
+ * waterfall.exchanges = [
+ *   {
+ *     request: { method: 'GET', url: '/api/users' },
+ *     response: { status: 200, statusText: 'OK' },
+ *     timing: { startTime: 0, endTime: 87, duration: 87 }
+ *   }
+ * ];
+ *
+ * @example
+ * // Live capture mode
+ * <http-waterfall capture="true" filter="/api/*" theme="dark"></http-waterfall>
  */
 class HTTPWaterfallElement extends HTMLElement {
   constructor() {
@@ -30,6 +153,10 @@ class HTTPWaterfallElement extends HTMLElement {
     return ['view', 'requests', 'capture', 'filter', 'max-entries', 'theme'];
   }
 
+  /**
+   * Called when element is added to the DOM
+   * @memberof HTTPWaterfallElement
+   */
   connectedCallback() {
     // Set smart default view if not explicitly set
     if (!this.hasAttribute('view')) {
@@ -38,7 +165,7 @@ class HTTPWaterfallElement extends HTMLElement {
 
     // Create initial DOM structure
     this.shadowRoot.innerHTML = `
-      <link rel="stylesheet" href="../css/http-waterfall.css">
+      <style>${HTTP_WATERFALL_STYLES}</style>
       <div class="http-waterfall">
         <div class="toolbar-container"></div>
         <div class="view-container"></div>
@@ -127,15 +254,30 @@ class HTTPWaterfallElement extends HTMLElement {
     });
   }
 
+  /**
+   * Set HTTP exchanges to display
+   * @param {HTTPExchangeWithTiming[]} value - Array of HTTP exchanges with timing
+   * @memberof HTTPWaterfallElement
+   */
   set exchanges(value) {
     this._exchanges = Array.isArray(value) ? value : [];
     this.render();
   }
 
+  /**
+   * Get current HTTP exchanges
+   * @returns {HTTPExchangeWithTiming[]} Array of exchanges
+   * @memberof HTTPWaterfallElement
+   */
   get exchanges() {
     return this._exchanges;
   }
 
+  /**
+   * Set current view mode
+   * @param {'list'|'duration'|'waterfall'} value - View mode
+   * @memberof HTTPWaterfallElement
+   */
   set view(value) {
     if (this._view !== value) {
       this._view = value;
@@ -145,12 +287,18 @@ class HTTPWaterfallElement extends HTMLElement {
     }
   }
 
+  /**
+   * Get current view mode
+   * @returns {'list'|'duration'|'waterfall'} Current view mode
+   * @memberof HTTPWaterfallElement
+   */
   get view() {
     return this._view;
   }
 
   /**
-   * Start capturing live HTTP requests
+   * Start capturing live HTTP requests using the interceptor
+   * @memberof HTTPWaterfallElement
    */
   startCapture() {
     if (this._interceptor) return; // Already capturing
