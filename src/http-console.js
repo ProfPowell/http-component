@@ -1,8 +1,433 @@
 /**
+ * Inline CSS styles for http-console component
+ * @const {string}
+ */
+const HTTP_CONSOLE_STYLES = `
+/**
+ * HTTP Console Component Styles
+ * Styling for displaying HTTP request/response data in wire format
+ */
+
+:host {
+  display: block;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
+  line-height: 1.5;
+
+  /* Light mode colors (default) */
+  --bg-primary: #f5f5f5;
+  --bg-secondary: white;
+  --bg-header-request: #2563eb;
+  --bg-header-response: #059669;
+  --border-color: #ddd;
+  --text-primary: #1f2937;
+  --text-secondary: #64748b;
+  --text-empty: #9ca3af;
+
+  /* HTTP Method colors */
+  --method-get: #2563eb;
+  --method-post: #059669;
+  --method-put: #d97706;
+  --method-delete: #dc2626;
+  --method-patch: #7c3aed;
+
+  /* HTTP Status colors */
+  --status-success: #16a34a;
+  --status-redirect: #2563eb;
+  --status-client-error: #ea580c;
+  --status-server-error: #dc2626;
+
+  /* Syntax highlighting */
+  --url-color: #0891b2;
+  --version-color: #64748b;
+  --header-name: #0066cc;
+  --header-value: #334155;
+  --reason-phrase: #1f2937;
+  --mime-type-bg: #f3e8ff;
+  --mime-type-text: #7c3aed;
+
+  /* JSON colors */
+  --json-key: #0066cc;
+  --json-string: #22863a;
+  --json-number: #005cc5;
+  --json-boolean: #6f42c1;
+  --json-null: #6a737d;
+  --json-error-bg: #ffeef0;
+  --json-error-text: #d73a49;
+
+  /* HTML colors */
+  --html-tag: #2563eb;
+  --html-attr: #059669;
+  --html-value: #7c3aed;
+  --html-comment: #6a737d;
+
+  /* CSS colors */
+  --css-selector: #2563eb;
+  --css-property: #059669;
+  --css-value: #7c3aed;
+  --css-comment: #6a737d;
+
+  /* JS colors */
+  --js-keyword: #7c3aed;
+  --js-string: #22863a;
+  --js-number: #005cc5;
+  --js-comment: #6a737d;
+}
+
+/* Dark mode */
+:host([theme="dark"]) {
+  --bg-primary: #1f2937;
+  --bg-secondary: #111827;
+  --bg-header-request: #3b82f6;
+  --bg-header-response: #10b981;
+  --border-color: #374151;
+  --text-primary: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --text-empty: #6b7280;
+
+  /* HTTP Method colors - brighter for dark mode */
+  --method-get: #60a5fa;
+  --method-post: #34d399;
+  --method-put: #fbbf24;
+  --method-delete: #f87171;
+  --method-patch: #a78bfa;
+
+  /* HTTP Status colors - brighter for dark mode */
+  --status-success: #4ade80;
+  --status-redirect: #60a5fa;
+  --status-client-error: #fb923c;
+  --status-server-error: #f87171;
+
+  /* Syntax highlighting - adjusted for dark backgrounds */
+  --url-color: #22d3ee;
+  --version-color: #9ca3af;
+  --header-name: #60a5fa;
+  --header-value: #d1d5db;
+  --reason-phrase: #f3f4f6;
+  --mime-type-bg: #581c87;
+  --mime-type-text: #e9d5ff;
+
+  /* JSON colors - brighter for dark mode */
+  --json-key: #60a5fa;
+  --json-string: #6ee7b7;
+  --json-number: #93c5fd;
+  --json-boolean: #c4b5fd;
+  --json-null: #9ca3af;
+  --json-error-bg: #7f1d1d;
+  --json-error-text: #fca5a5;
+
+  /* HTML colors */
+  --html-tag: #60a5fa;
+  --html-attr: #34d399;
+  --html-value: #c4b5fd;
+  --html-comment: #9ca3af;
+
+  /* CSS colors */
+  --css-selector: #60a5fa;
+  --css-property: #34d399;
+  --css-value: #c4b5fd;
+  --css-comment: #9ca3af;
+
+  /* JS colors */
+  --js-keyword: #c4b5fd;
+  --js-string: #6ee7b7;
+  --js-number: #93c5fd;
+  --js-comment: #9ca3af;
+}
+
+.http-console {
+  display: flex;
+  gap: 20px;
+  padding: 16px;
+  background: var(--bg-primary);
+  border-radius: 4px;
+}
+
+.http-section {
+  flex: 1;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.section-header {
+  background: #333;
+  color: white;
+  padding: 8px 12px;
+  font-weight: bold;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.request-section .section-header {
+  background: var(--bg-header-request);
+}
+
+.response-section .section-header {
+  background: var(--bg-header-response);
+}
+
+.http-content {
+  padding: 16px;
+}
+
+.http-content pre {
+  margin: 0;
+  padding: 0;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  color: var(--text-primary);
+}
+
+.empty {
+  color: var(--text-empty);
+  font-style: italic;
+  padding: 8px 0;
+}
+
+/* HTTP Headers Highlighting */
+.http-method-get {
+  color: var(--method-get);
+  font-weight: bold;
+}
+
+.http-method-post {
+  color: var(--method-post);
+  font-weight: bold;
+}
+
+.http-method-put {
+  color: var(--method-put);
+  font-weight: bold;
+}
+
+.http-method-delete {
+  color: var(--method-delete);
+  font-weight: bold;
+}
+
+.http-method-patch {
+  color: var(--method-patch);
+  font-weight: bold;
+}
+
+.http-url {
+  color: var(--url-color);
+}
+
+.http-version {
+  color: var(--version-color);
+}
+
+.http-status-success {
+  color: var(--status-success);
+  font-weight: bold;
+}
+
+.http-status-redirect {
+  color: var(--status-redirect);
+  font-weight: bold;
+}
+
+.http-status-client-error {
+  color: var(--status-client-error);
+  font-weight: bold;
+}
+
+.http-status-server-error {
+  color: var(--status-server-error);
+  font-weight: bold;
+}
+
+.http-status-text {
+  color: var(--version-color);
+}
+
+.http-reason-phrase {
+  color: var(--reason-phrase);
+  font-weight: 600;
+}
+
+.http-header-name {
+  color: var(--header-name);
+  font-weight: 600;
+}
+
+.mime-type {
+  color: var(--mime-type-text);
+  font-weight: 700;
+  background: var(--mime-type-bg);
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+
+.http-header-value {
+  color: var(--header-value);
+}
+
+/* JSON Syntax Highlighting */
+.json-key {
+  color: var(--json-key);
+  font-weight: 600;
+}
+
+.json-string {
+  color: var(--json-string);
+}
+
+.json-number {
+  color: var(--json-number);
+}
+
+.json-boolean {
+  color: var(--json-boolean);
+  font-weight: 600;
+}
+
+.json-null {
+  color: var(--json-null);
+  font-style: italic;
+}
+
+.json-error {
+  color: var(--json-error-text);
+  font-weight: 600;
+  background: var(--json-error-bg);
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-right: 8px;
+}
+
+/* HTML Syntax Highlighting */
+.html-tag {
+  color: var(--html-tag);
+}
+
+.html-attr {
+  color: var(--html-attr);
+}
+
+.html-value {
+  color: var(--html-value);
+}
+
+.html-comment {
+  color: var(--html-comment);
+  font-style: italic;
+}
+
+/* CSS Syntax Highlighting */
+.css-selector {
+  color: var(--css-selector);
+  font-weight: 600;
+}
+
+.css-property {
+  color: var(--css-property);
+}
+
+.css-value {
+  color: var(--css-value);
+}
+
+.css-comment {
+  color: var(--css-comment);
+  font-style: italic;
+}
+
+/* JavaScript Syntax Highlighting */
+.js-keyword {
+  color: var(--js-keyword);
+  font-weight: 600;
+}
+
+.js-string {
+  color: var(--js-string);
+}
+
+.js-number {
+  color: var(--js-number);
+}
+
+.js-comment {
+  color: var(--js-comment);
+  font-style: italic;
+}
+
+/* Responsive layout for smaller screens */
+@media (max-width: 768px) {
+  .http-console {
+    flex-direction: column;
+  }
+}
+`;
+
+/**
+ * @typedef {Object} HTTPRequest
+ * @property {string} method - HTTP method (GET, POST, etc.)
+ * @property {string} url - Request URL
+ * @property {string} [httpVersion='HTTP/1.1'] - HTTP protocol version
+ * @property {Object.<string, string>} [headers={}] - Request headers
+ * @property {string|null} [body=null] - Request body
+ */
+
+/**
+ * @typedef {Object} HTTPResponse
+ * @property {number} status - HTTP status code
+ * @property {string} statusText - Status text (OK, Not Found, etc.)
+ * @property {string} [httpVersion='HTTP/1.1'] - HTTP protocol version
+ * @property {Object.<string, string>} [headers={}] - Response headers
+ * @property {string|null} [body=null] - Response body
+ */
+
+/**
+ * @typedef {Object} HTTPExchange
+ * @property {HTTPRequest} request - The HTTP request
+ * @property {HTTPResponse} response - The HTTP response
+ */
+
+/**
  * HTTPConsoleElement - Web component for displaying HTTP request/response data
- * Displays data in raw HTTP wire format for educational purposes
+ * Displays data in raw HTTP wire format for educational purposes.
+ *
+ * @class
+ * @extends HTMLElement
+ *
+ * @example
+ * // Using the data property
+ * const console = document.querySelector('http-console');
+ * console.data = {
+ *   request: {
+ *     method: 'GET',
+ *     url: '/api/users',
+ *     headers: { 'Accept': 'application/json' }
+ *   },
+ *   response: {
+ *     status: 200,
+ *     statusText: 'OK',
+ *     headers: { 'Content-Type': 'application/json' },
+ *     body: JSON.stringify({ id: 1, name: 'John' })
+ *   }
+ * };
+ *
+ * @example
+ * // Using attributes
+ * <http-console
+ *   request='{"method":"GET","url":"/api/users"}'
+ *   response='{"status":200,"body":"..."}'
+ *   theme="dark">
+ * </http-console>
  */
 class HTTPConsoleElement extends HTMLElement {
+  /**
+   * Creates an instance of HTTPConsoleElement
+   * @constructor
+   */
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
@@ -16,15 +441,31 @@ class HTTPConsoleElement extends HTMLElement {
     }
   }
 
+  /**
+   * Observed attributes for automatic re-rendering
+   * @static
+   * @returns {string[]} Array of observed attribute names
+   */
   static get observedAttributes() {
     return ['request', 'response', 'theme'];
   }
 
+  /**
+   * Called when element is added to the DOM
+   * @memberof HTTPConsoleElement
+   */
   connectedCallback() {
     this.render();
     this.updateTheme();
   }
 
+  /**
+   * Called when observed attributes change
+   * @param {string} name - Attribute name
+   * @param {string} oldValue - Previous value
+   * @param {string} newValue - New value
+   * @memberof HTTPConsoleElement
+   */
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue !== newValue) {
       if (name === 'theme') {
@@ -37,6 +478,8 @@ class HTTPConsoleElement extends HTMLElement {
 
   /**
    * Update theme based on attribute or system preference
+   * Sets theme to 'dark', 'light', or auto-detects from system
+   * @memberof HTTPConsoleElement
    */
   updateTheme() {
     const themeAttr = this.getAttribute('theme');
@@ -53,18 +496,29 @@ class HTTPConsoleElement extends HTMLElement {
 
   /**
    * Set request/response data via property
+   * @param {HTTPExchange} value - HTTP exchange data containing request and response
+   * @memberof HTTPConsoleElement
    */
   set data(value) {
     this._data = value;
     this.render();
   }
 
+  /**
+   * Get current HTTP exchange data
+   * @returns {HTTPExchange|null} Current exchange data
+   * @memberof HTTPConsoleElement
+   */
   get data() {
     return this._data;
   }
 
   /**
    * Parse JSON attribute or use property data
+   * Attempts to parse 'request' and 'response' attributes as JSON
+   * @returns {HTTPExchange} Exchange object with request and response
+   * @memberof HTTPConsoleElement
+   * @private
    */
   getData() {
     if (this._data) {
@@ -85,11 +539,16 @@ class HTTPConsoleElement extends HTMLElement {
     }
   }
 
+  /**
+   * Render the component's shadow DOM
+   * @memberof HTTPConsoleElement
+   * @private
+   */
   render() {
     const data = this.getData();
 
     this.shadowRoot.innerHTML = `
-      <link rel="stylesheet" href="../css/http-console.css">
+      <style>${HTTP_CONSOLE_STYLES}</style>
       <div class="http-console">
         <div class="http-section request-section">
           <div class="section-header">Request</div>
@@ -107,6 +566,13 @@ class HTTPConsoleElement extends HTMLElement {
     `;
   }
 
+  /**
+   * Render HTTP request in wire format
+   * @param {HTTPRequest|null} request - Request data to render
+   * @returns {string} HTML string for request section
+   * @memberof HTTPConsoleElement
+   * @private
+   */
   renderRequest(request) {
     if (!request) {
       return '<div class="empty">No request data</div>';
@@ -141,6 +607,13 @@ class HTTPConsoleElement extends HTMLElement {
     return `<pre>${content}</pre>`;
   }
 
+  /**
+   * Render HTTP response in wire format
+   * @param {HTTPResponse|null} response - Response data to render
+   * @returns {string} HTML string for response section
+   * @memberof HTTPConsoleElement
+   * @private
+   */
   renderResponse(response) {
     if (!response) {
       return '<div class="empty">No response data</div>';
@@ -176,7 +649,11 @@ class HTTPConsoleElement extends HTMLElement {
   }
 
   /**
-   * Get status code color class
+   * Get CSS class name for status code color
+   * @param {number} status - HTTP status code
+   * @returns {string} CSS class name for status color
+   * @memberof HTTPConsoleElement
+   * @private
    */
   getStatusColorClass(status) {
     if (status >= 200 && status < 300) return 'http-status-success';
@@ -186,6 +663,13 @@ class HTTPConsoleElement extends HTMLElement {
     return 'http-status';
   }
 
+  /**
+   * Escape HTML special characters to prevent XSS
+   * @param {string} text - Text to escape
+   * @returns {string} HTML-escaped text
+   * @memberof HTTPConsoleElement
+   * @private
+   */
   escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
@@ -194,6 +678,10 @@ class HTTPConsoleElement extends HTMLElement {
 
   /**
    * Highlight Content-Type header value (MIME type)
+   * @param {string} value - Content-Type header value
+   * @returns {string} HTML string with highlighted MIME type
+   * @memberof HTTPConsoleElement
+   * @private
    */
   highlightContentType(value) {
     const escaped = this.escapeHtml(value);
@@ -211,6 +699,10 @@ class HTTPConsoleElement extends HTMLElement {
 
   /**
    * Check if content type indicates JSON
+   * @param {Object.<string, string>} headers - HTTP headers object
+   * @returns {boolean} True if content type is JSON
+   * @memberof HTTPConsoleElement
+   * @private
    */
   isJsonContentType(headers) {
     const contentType = headers['Content-Type'] || headers['content-type'] || '';
@@ -219,6 +711,10 @@ class HTTPConsoleElement extends HTMLElement {
 
   /**
    * Check if content type is binary
+   * @param {string} contentType - Content-Type header value
+   * @returns {boolean} True if content type is binary
+   * @memberof HTTPConsoleElement
+   * @private
    */
   isBinaryContentType(contentType) {
     const binaryTypes = [
@@ -229,7 +725,13 @@ class HTTPConsoleElement extends HTMLElement {
   }
 
   /**
-   * Format body with appropriate formatting
+   * Format body with appropriate formatting based on content type
+   * Handles JSON, HTML, CSS, JavaScript, and binary data
+   * @param {string} body - Response body content
+   * @param {Object.<string, string>} headers - HTTP headers
+   * @returns {string} Formatted and syntax-highlighted body HTML
+   * @memberof HTTPConsoleElement
+   * @private
    */
   formatBody(body, headers) {
     if (!body) return '';
@@ -277,6 +779,12 @@ class HTTPConsoleElement extends HTMLElement {
 
   /**
    * Format JSON with syntax highlighting
+   * Recursively formats JSON with proper indentation and color coding
+   * @param {*} obj - JavaScript object to format
+   * @param {number} [indent=0] - Current indentation level
+   * @returns {string} Formatted JSON with HTML syntax highlighting
+   * @memberof HTTPConsoleElement
+   * @private
    */
   formatJson(obj, indent = 0) {
     const indentStr = '  '.repeat(indent);
@@ -323,7 +831,11 @@ class HTTPConsoleElement extends HTMLElement {
   }
 
   /**
-   * Highlight HTML syntax
+   * Highlight HTML syntax with color coding for tags, attributes, and comments
+   * @param {string} html - HTML-escaped HTML code to highlight
+   * @returns {string} HTML with syntax highlighting spans
+   * @memberof HTTPConsoleElement
+   * @private
    */
   highlightHtml(html) {
     return html
@@ -339,7 +851,11 @@ class HTTPConsoleElement extends HTMLElement {
   }
 
   /**
-   * Highlight CSS syntax
+   * Highlight CSS syntax with color coding for selectors, properties, and values
+   * @param {string} css - HTML-escaped CSS code to highlight
+   * @returns {string} CSS with syntax highlighting spans
+   * @memberof HTTPConsoleElement
+   * @private
    */
   highlightCss(css) {
     return css
@@ -358,7 +874,11 @@ class HTTPConsoleElement extends HTMLElement {
   }
 
   /**
-   * Highlight JavaScript syntax
+   * Highlight JavaScript syntax with color coding for keywords, strings, and comments
+   * @param {string} js - HTML-escaped JavaScript code to highlight
+   * @returns {string} JavaScript with syntax highlighting spans
+   * @memberof HTTPConsoleElement
+   * @private
    */
   highlightJavaScript(js) {
     // Use a placeholder system to prevent regex interference

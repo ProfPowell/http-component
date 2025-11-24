@@ -1,22 +1,63 @@
 /**
+ * @typedef {Object} InterceptorOptions
+ * @property {string|null} [filter=null] - URL filter pattern (* wildcard supported)
+ * @property {number} [maxBodySize=1048576] - Maximum body size to capture (bytes)
+ */
+
+/**
+ * @callback ExchangeCallback
+ * @param {Object} exchange - Captured HTTP exchange
+ * @param {Object} exchange.request - Request data
+ * @param {Object} exchange.response - Response data
+ * @param {Object} exchange.timing - Timing information
+ */
+
+/**
  * HTTP Interceptor - Captures fetch and XMLHttpRequest calls
- * Provides timing data and request/response details for visualization
+ * Provides timing data and request/response details for visualization.
+ * Patches global fetch and XMLHttpRequest to intercept all HTTP traffic.
+ *
+ * @class
+ * @example
+ * const interceptor = new HTTPInterceptor();
+ * interceptor.start((exchange) => {
+ *   console.log('Captured:', exchange.request.method, exchange.request.url);
+ * }, {
+ *   filter: '/api/*',
+ *   maxBodySize: 1024 * 1024
+ * });
+ *
+ * // Later, stop intercepting
+ * interceptor.stop();
  */
 export class HTTPInterceptor {
+  /**
+   * Creates a new HTTP interceptor instance
+   * @constructor
+   */
   constructor() {
+    /** @type {Set<ExchangeCallback>} */
     this.listeners = new Set();
+    /** @type {boolean} */
     this.isActive = false;
+    /** @type {boolean} */
     this.isPaused = false;
+    /** @type {string|null} */
     this.filter = null;
+    /** @type {Function|null} */
     this.originalFetch = null;
+    /** @type {Function|null} */
     this.originalXHR = null;
+    /** @type {number} */
     this.maxBodySize = 1024 * 1024; // 1MB
   }
 
   /**
    * Start intercepting HTTP requests
-   * @param {Function} callback - Called with each captured exchange
-   * @param {Object} options - Configuration options
+   * Patches window.fetch and window.XMLHttpRequest
+   * @param {ExchangeCallback} callback - Called with each captured exchange
+   * @param {InterceptorOptions} [options={}] - Configuration options
+   * @memberof HTTPInterceptor
    */
   start(callback, options = {}) {
     if (this.isActive) {
@@ -40,6 +81,8 @@ export class HTTPInterceptor {
 
   /**
    * Stop intercepting and restore original functions
+   * Removes patches from window.fetch and window.XMLHttpRequest
+   * @memberof HTTPInterceptor
    */
   stop() {
     if (!this.isActive) return;
@@ -59,18 +102,26 @@ export class HTTPInterceptor {
   }
 
   /**
-   * Pause/resume capturing without stopping interception
+   * Pause capturing without stopping interception
+   * Requests will still be intercepted but not forwarded to listeners
+   * @memberof HTTPInterceptor
    */
   pause() {
     this.isPaused = true;
   }
 
+  /**
+   * Resume capturing after pause
+   * @memberof HTTPInterceptor
+   */
   resume() {
     this.isPaused = false;
   }
 
   /**
    * Add a listener for captured requests
+   * @param {ExchangeCallback} callback - Callback to invoke for each exchange
+   * @memberof HTTPInterceptor
    */
   addListener(callback) {
     this.listeners.add(callback);
@@ -78,6 +129,8 @@ export class HTTPInterceptor {
 
   /**
    * Remove a listener
+   * @param {ExchangeCallback} callback - Callback to remove
+   * @memberof HTTPInterceptor
    */
   removeListener(callback) {
     this.listeners.delete(callback);
@@ -85,6 +138,10 @@ export class HTTPInterceptor {
 
   /**
    * Notify all listeners with captured data
+   * Applies filter and pause checks before notifying
+   * @param {Object} exchange - HTTP exchange to send to listeners
+   * @memberof HTTPInterceptor
+   * @private
    */
   notifyListeners(exchange) {
     if (this.isPaused) return;
