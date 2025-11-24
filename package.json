@@ -16,13 +16,19 @@
     "demo",
     "README.md",
     "LICENSE",
-    "CLAUDE.md"
+    "CLAUDE.md",
+    "custom-elements.json"
   ],
   "scripts": {
     "dev": "http-server -p 8081 -c-1 -o /demo",
     "start": "npm run dev",
     "test": "node --test test/*.test.js",
-    "test:watch": "node --test --watch test/*.test.js"
+    "test:watch": "node --test --watch test/*.test.js",
+    "lint": "eslint src test",
+    "lint:fix": "eslint src test --fix",
+    "analyze": "cem analyze",
+    "analyze:watch": "cem analyze --watch",
+    "prepare": "npm run analyze"
   },
   "keywords": [
     "web-components",
@@ -46,9 +52,12 @@
   },
   "homepage": "https://github.com/ProfPowell/http-component#readme",
   "devDependencies": {
+    "@custom-elements-manifest/analyzer": "^0.11.0",
+    "eslint": "^9.39.1",
     "http-server": "^14.1.1"
   },
   "engines": {
     "node": ">=18.0.0"
-  }
+  },
+  "customElements": "custom-elements.json"
 }

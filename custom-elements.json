@@ -1,0 +1,942 @@
+{
+  "schemaVersion": "1.0.0",
+  "readme": "",
+  "modules": [
+    {
+      "kind": "javascript-module",
+      "path": "src/http-console.js",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "HTTPConsoleElement - Web component for displaying HTTP request/response data\nDisplays data in raw HTTP wire format for educational purposes.",
+          "name": "HTTPConsoleElement",
+          "members": [
+            {
+              "kind": "method",
+              "name": "updateTheme",
+              "description": "Update theme based on attribute or system preference\nSets theme to 'dark', 'light', or auto-detects from system"
+            },
+            {
+              "kind": "field",
+              "name": "data",
+              "description": "Get current HTTP exchange data",
+              "parameters": [
+                {
+                  "description": "HTTP exchange data containing request and response",
+                  "name": "value",
+                  "type": {
+                    "text": "HTTPExchange"
+                  }
+                }
+              ],
+              "return": {
+                "type": {
+                  "text": "HTTPExchange|null"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getData",
+              "description": "Parse JSON attribute or use property data\nAttempts to parse 'request' and 'response' attributes as JSON",
+              "return": {
+                "type": {
+                  "text": "HTTPExchange"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "render",
+              "description": "Render the component's shadow DOM",
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "renderRequest",
+              "parameters": [
+                {
+                  "name": "request",
+                  "description": "Request data to render",
+                  "type": {
+                    "text": "HTTPRequest|null"
+                  }
+                }
+              ],
+              "description": "Render HTTP request in wire format",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "renderResponse",
+              "parameters": [
+                {
+                  "name": "response",
+                  "description": "Response data to render",
+                  "type": {
+                    "text": "HTTPResponse|null"
+                  }
+                }
+              ],
+              "description": "Render HTTP response in wire format",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "getStatusColorClass",
+              "parameters": [
+                {
+                  "name": "status",
+                  "description": "HTTP status code",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ],
+              "description": "Get CSS class name for status code color",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "escapeHtml",
+              "parameters": [
+                {
+                  "name": "text",
+                  "description": "Text to escape",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Escape HTML special characters to prevent XSS",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "highlightContentType",
+              "parameters": [
+                {
+                  "name": "value",
+                  "description": "Content-Type header value",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Highlight Content-Type header value (MIME type)",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "isJsonContentType",
+              "parameters": [
+                {
+                  "name": "headers",
+                  "description": "HTTP headers object",
+                  "type": {
+                    "text": "Object.<string, string>"
+                  }
+                }
+              ],
+              "description": "Check if content type indicates JSON",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "isBinaryContentType",
+              "parameters": [
+                {
+                  "name": "contentType",
+                  "description": "Content-Type header value",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Check if content type is binary",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "formatBody",
+              "parameters": [
+                {
+                  "name": "body",
+                  "description": "Response body content",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "headers",
+                  "description": "HTTP headers",
+                  "type": {
+                    "text": "Object.<string, string>"
+                  }
+                }
+              ],
+              "description": "Format body with appropriate formatting based on content type\nHandles JSON, HTML, CSS, JavaScript, and binary data",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "formatJson",
+              "parameters": [
+                {
+                  "name": "obj",
+                  "description": "JavaScript object to format",
+                  "type": {
+                    "text": "*"
+                  }
+                },
+                {
+                  "name": "indent",
+                  "default": "0",
+                  "description": "Current indentation level",
+                  "optional": true,
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ],
+              "description": "Format JSON with syntax highlighting\nRecursively formats JSON with proper indentation and color coding",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "highlightHtml",
+              "parameters": [
+                {
+                  "name": "html",
+                  "description": "HTML-escaped HTML code to highlight",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Highlight HTML syntax with color coding for tags, attributes, and comments",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "highlightCss",
+              "parameters": [
+                {
+                  "name": "css",
+                  "description": "HTML-escaped CSS code to highlight",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Highlight CSS syntax with color coding for selectors, properties, and values",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "highlightJavaScript",
+              "parameters": [
+                {
+                  "name": "js",
+                  "description": "HTML-escaped JavaScript code to highlight",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Highlight JavaScript syntax with color coding for keywords, strings, and comments",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "_data",
+              "type": {
+                "text": "null"
+              },
+              "default": "null"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "request"
+            },
+            {
+              "name": "response"
+            },
+            {
+              "name": "theme"
+            }
+          ],
+          "superclass": {
+            "name": "HTMLElement"
+          },
+          "tagName": "http-console",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "custom-element-definition",
+          "name": "http-console",
+          "declaration": {
+            "name": "HTTPConsoleElement",
+            "module": "src/http-console.js"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/http-interceptor.js",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "HTTP Interceptor - Captures fetch and XMLHttpRequest calls\nProvides timing data and request/response details for visualization.\nPatches global fetch and XMLHttpRequest to intercept all HTTP traffic.",
+          "name": "HTTPInterceptor",
+          "members": [
+            {
+              "kind": "method",
+              "name": "start",
+              "parameters": [
+                {
+                  "name": "callback",
+                  "description": "Called with each captured exchange",
+                  "type": {
+                    "text": "ExchangeCallback"
+                  }
+                },
+                {
+                  "name": "options",
+                  "default": "{}",
+                  "description": "Configuration options",
+                  "optional": true,
+                  "type": {
+                    "text": "InterceptorOptions"
+                  }
+                }
+              ],
+              "description": "Start intercepting HTTP requests\nPatches window.fetch and window.XMLHttpRequest"
+            },
+            {
+              "kind": "method",
+              "name": "stop",
+              "description": "Stop intercepting and restore original functions\nRemoves patches from window.fetch and window.XMLHttpRequest"
+            },
+            {
+              "kind": "method",
+              "name": "pause",
+              "description": "Pause capturing without stopping interception\nRequests will still be intercepted but not forwarded to listeners"
+            },
+            {
+              "kind": "method",
+              "name": "resume",
+              "description": "Resume capturing after pause"
+            },
+            {
+              "kind": "method",
+              "name": "addListener",
+              "parameters": [
+                {
+                  "name": "callback",
+                  "description": "Callback to invoke for each exchange",
+                  "type": {
+                    "text": "ExchangeCallback"
+                  }
+                }
+              ],
+              "description": "Add a listener for captured requests"
+            },
+            {
+              "kind": "method",
+              "name": "removeListener",
+              "parameters": [
+                {
+                  "name": "callback",
+                  "description": "Callback to remove",
+                  "type": {
+                    "text": "ExchangeCallback"
+                  }
+                }
+              ],
+              "description": "Remove a listener"
+            },
+            {
+              "kind": "method",
+              "name": "notifyListeners",
+              "parameters": [
+                {
+                  "name": "exchange",
+                  "description": "HTTP exchange to send to listeners",
+                  "type": {
+                    "text": "Object"
+                  }
+                }
+              ],
+              "description": "Notify all listeners with captured data\nApplies filter and pause checks before notifying",
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "matchesFilter",
+              "parameters": [
+                {
+                  "name": "url"
+                }
+              ],
+              "description": "Check if URL matches filter pattern"
+            },
+            {
+              "kind": "method",
+              "name": "patchFetch",
+              "description": "Patch window.fetch"
+            },
+            {
+              "kind": "method",
+              "name": "patchXHR",
+              "description": "Patch XMLHttpRequest"
+            },
+            {
+              "kind": "method",
+              "name": "extractHeaders",
+              "parameters": [
+                {
+                  "name": "headers"
+                }
+              ],
+              "description": "Extract headers from various formats"
+            },
+            {
+              "kind": "method",
+              "name": "extractResponse",
+              "parameters": [
+                {
+                  "name": "response"
+                }
+              ],
+              "description": "Extract response data"
+            },
+            {
+              "kind": "method",
+              "name": "truncateBody",
+              "parameters": [
+                {
+                  "name": "text"
+                },
+                {
+                  "name": "contentType"
+                }
+              ],
+              "description": "Truncate large bodies"
+            },
+            {
+              "kind": "field",
+              "name": "listeners",
+              "type": {
+                "text": "Set<ExchangeCallback>"
+              },
+              "default": "new Set()"
+            },
+            {
+              "kind": "field",
+              "name": "isActive",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "isPaused",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "filter",
+              "type": {
+                "text": "string|null"
+              },
+              "default": "null"
+            },
+            {
+              "kind": "field",
+              "name": "originalFetch",
+              "type": {
+                "text": "Function|null"
+              },
+              "default": "null"
+            },
+            {
+              "kind": "field",
+              "name": "originalXHR",
+              "type": {
+                "text": "Function|null"
+              },
+              "default": "null"
+            },
+            {
+              "kind": "field",
+              "name": "maxBodySize",
+              "type": {
+                "text": "number"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "variable",
+          "name": "request",
+          "type": {
+            "text": "object"
+          },
+          "default": "{ method: init.method || 'GET', url: url, httpVersion: 'HTTP/1.1', headers: interceptor.extractHeaders(init.headers), body: init.body || null }"
+        },
+        {
+          "kind": "variable",
+          "name": "endTime"
+        },
+        {
+          "kind": "variable",
+          "name": "httpInterceptor",
+          "default": "new HTTPInterceptor()"
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "HTTPInterceptor",
+          "declaration": {
+            "name": "HTTPInterceptor",
+            "module": "src/http-interceptor.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "httpInterceptor",
+          "declaration": {
+            "name": "httpInterceptor",
+            "module": "src/http-interceptor.js"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/http-waterfall.js",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "HTTPWaterfallElement - Web component for displaying multiple HTTP exchanges\nSupports list, duration, and waterfall timeline views with live capture capability",
+          "name": "HTTPWaterfallElement",
+          "members": [
+            {
+              "kind": "method",
+              "name": "updateTheme",
+              "description": "Update theme based on attribute or system preference"
+            },
+            {
+              "kind": "method",
+              "name": "updateChildThemes",
+              "description": "Update theme on child http-console elements"
+            },
+            {
+              "kind": "field",
+              "name": "exchanges",
+              "description": "Get current HTTP exchanges",
+              "parameters": [
+                {
+                  "description": "Array of HTTP exchanges with timing",
+                  "name": "value",
+                  "type": {
+                    "text": "HTTPExchangeWithTiming[]"
+                  }
+                }
+              ],
+              "return": {
+                "type": {
+                  "text": "HTTPExchangeWithTiming[]"
+                }
+              }
+            },
+            {
+              "kind": "field",
+              "name": "view",
+              "description": "Get current view mode",
+              "parameters": [
+                {
+                  "description": "View mode",
+                  "name": "value",
+                  "type": {
+                    "text": "'list'|'duration'|'waterfall'"
+                  }
+                }
+              ],
+              "return": {
+                "type": {
+                  "text": "'list'|'duration'|'waterfall'"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "startCapture",
+              "description": "Start capturing live HTTP requests using the interceptor"
+            },
+            {
+              "kind": "method",
+              "name": "stopCapture",
+              "description": "Stop capturing"
+            },
+            {
+              "kind": "method",
+              "name": "togglePause",
+              "description": "Pause/resume capturing"
+            },
+            {
+              "kind": "method",
+              "name": "clearExchanges",
+              "description": "Clear all captured exchanges"
+            },
+            {
+              "kind": "method",
+              "name": "areRequestsClustered",
+              "description": "Determine if requests are clustered (within 10 seconds of each other)"
+            },
+            {
+              "kind": "method",
+              "name": "getSmartDefaultView",
+              "description": "Get smart default view based on context"
+            },
+            {
+              "kind": "method",
+              "name": "addCapturedExchange",
+              "parameters": [
+                {
+                  "name": "exchange"
+                }
+              ],
+              "description": "Add a captured exchange"
+            },
+            {
+              "kind": "method",
+              "name": "toggleRow",
+              "parameters": [
+                {
+                  "name": "index"
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "render"
+            },
+            {
+              "kind": "method",
+              "name": "renderView"
+            },
+            {
+              "kind": "method",
+              "name": "renderToolbar"
+            },
+            {
+              "kind": "method",
+              "name": "renderListView"
+            },
+            {
+              "kind": "method",
+              "name": "renderExchangeRow",
+              "parameters": [
+                {
+                  "name": "exchange"
+                },
+                {
+                  "name": "index"
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "renderExchangeDetail",
+              "parameters": [
+                {
+                  "name": "exchange"
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "renderDurationView"
+            },
+            {
+              "kind": "method",
+              "name": "renderDurationRow",
+              "parameters": [
+                {
+                  "name": "exchange"
+                },
+                {
+                  "name": "index"
+                },
+                {
+                  "name": "maxDuration"
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "getMaxDuration"
+            },
+            {
+              "kind": "method",
+              "name": "renderWaterfallView"
+            },
+            {
+              "kind": "method",
+              "name": "renderTimelineHeader",
+              "parameters": [
+                {
+                  "name": "totalDuration"
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "renderWaterfallRow",
+              "parameters": [
+                {
+                  "name": "exchange"
+                },
+                {
+                  "name": "index"
+                },
+                {
+                  "name": "baseTime"
+                },
+                {
+                  "name": "totalDuration"
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "calculateTimeInterval",
+              "parameters": [
+                {
+                  "name": "totalDuration"
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "shortenUrl",
+              "parameters": [
+                {
+                  "name": "url"
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "getStatusClass",
+              "parameters": [
+                {
+                  "name": "status"
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "formatSize",
+              "parameters": [
+                {
+                  "name": "bytes"
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "escapeHtml",
+              "parameters": [
+                {
+                  "name": "text"
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "updateRequestCount",
+              "description": "Update just the request count without re-rendering toolbar"
+            },
+            {
+              "kind": "method",
+              "name": "attachToolbarEventListeners"
+            },
+            {
+              "kind": "method",
+              "name": "attachViewEventListeners"
+            },
+            {
+              "kind": "field",
+              "name": "_exchanges",
+              "type": {
+                "text": "array"
+              },
+              "default": "[]"
+            },
+            {
+              "kind": "field",
+              "name": "_view",
+              "type": {
+                "text": "string"
+              },
+              "default": "'duration'"
+            },
+            {
+              "kind": "field",
+              "name": "_expandedRows",
+              "default": "new Set()"
+            },
+            {
+              "kind": "field",
+              "name": "_capture",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "_filter",
+              "type": {
+                "text": "null"
+              },
+              "default": "null"
+            },
+            {
+              "kind": "field",
+              "name": "_maxEntries",
+              "type": {
+                "text": "number"
+              },
+              "default": "100"
+            },
+            {
+              "kind": "field",
+              "name": "_isPaused",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "_interceptor",
+              "type": {
+                "text": "null"
+              },
+              "default": "null"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "view"
+            },
+            {
+              "name": "requests"
+            },
+            {
+              "name": "capture"
+            },
+            {
+              "name": "filter"
+            },
+            {
+              "name": "max-entries"
+            },
+            {
+              "name": "theme"
+            }
+          ],
+          "superclass": {
+            "name": "HTMLElement"
+          },
+          "tagName": "http-waterfall",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "custom-element-definition",
+          "name": "http-waterfall",
+          "declaration": {
+            "name": "HTTPWaterfallElement",
+            "module": "src/http-waterfall.js"
+          }
+        }
+      ]
+    }
+  ]
+}
