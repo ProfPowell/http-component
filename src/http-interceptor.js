@@ -374,7 +374,7 @@ export class HTTPInterceptor {
       // Try to read body
       const text = await response.text();
       body = this.truncateBody(text, contentType);
-    } catch (error) {
+    } catch {
       body = '[Body not accessible - CORS or stream error]';
     }
 
@@ -390,7 +390,7 @@ export class HTTPInterceptor {
   /**
    * Truncate large bodies
    */
-  truncateBody(text, contentType) {
+  truncateBody(text, _contentType) {
     if (!text) return null;
 
     if (text.length > this.maxBodySize) {

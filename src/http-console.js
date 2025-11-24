@@ -791,7 +791,7 @@ class HTTPConsoleElement extends HTMLElement {
     const nextIndent = '  '.repeat(indent + 1);
 
     if (obj === null) {
-      return `<span class="json-null">null</span>`;
+      return '<span class="json-null">null</span>';
     }
 
     if (typeof obj === 'boolean') {
