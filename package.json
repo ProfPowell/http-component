@@ -1,0 +1,21 @@
+{
+  "name": "http-console-component",
+  "version": "0.1.0",
+  "description": "Dependency-free vanilla web components for displaying HTTP request/response data",
+  "type": "module",
+  "scripts": {
+    "dev": "http-server -p 8081 -c-1 -o /demo",
+    "start": "npm run dev"
+  },
+  "keywords": [
+    "web-components",
+    "http",
+    "console",
+    "educational"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
