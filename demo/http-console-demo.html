@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP Console Web Component Demo</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      background: #fafafa;
+    }
+
+    h1 {
+      color: #1f2937;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #6b7280;
+      margin-bottom: 40px;
+    }
+
+    .demo-section {
+      margin-bottom: 60px;
+    }
+
+    .demo-section h2 {
+      color: #374151;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .demo-section p {
+      color: #6b7280;
+      margin-bottom: 20px;
+    }
+
+    http-console {
+      margin-bottom: 30px;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .nav a {
+      color: #2563eb;
+      text-decoration: none;
+      margin-right: 16px;
+    }
+
+    .nav a:hover {
+      text-decoration: underline;
+    }
+
+    .theme-toggle {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background 0.2s;
+      margin-left: auto;
+    }
+
+    .theme-toggle:hover {
+      background: #1d4ed8;
+    }
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <a href="index.html">← back to demos</a>
+    <a href="waterfall.html">→ request viewer demo</a>
+    <a href="live-capture.html">→ live capture demo</a>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+  </div>
+
+  <h1>HTTP Console Web Component</h1>
+  <p class="subtitle">Educational HTTP request/response visualization</p>
+
+  <div class="demo-section">
+    <h2>Example 1: Simple GET Request</h2>
+    <p>A basic GET request to retrieve user data</p>
+    <http-console id="example1"></http-console>
+  </div>
+
+  <div class="demo-section">
+    <h2>Example 2: POST Request with JSON Body</h2>
+    <p>Creating a new user with JSON payload</p>
+    <http-console id="example2"></http-console>
+  </div>
+
+  <div class="demo-section">
+    <h2>Example 3: Error Response</h2>
+    <p>A 404 Not Found response</p>
+    <http-console id="example3"></http-console>
+  </div>
+
+  <div class="demo-section">
+    <h2>Example 4: HTML Response</h2>
+    <p>Server returning HTML content with syntax highlighting</p>
+    <http-console id="example4"></http-console>
+  </div>
+
+  <div class="demo-section">
+    <h2>Example 5: CSS Response</h2>
+    <p>Stylesheet with CSS syntax highlighting</p>
+    <http-console id="example5"></http-console>
+  </div>
+
+  <div class="demo-section">
+    <h2>Example 6: JavaScript Response</h2>
+    <p>JavaScript code with syntax highlighting</p>
+    <http-console id="example6"></http-console>
+  </div>
+
+  <div class="demo-section">
+    <h2>Example 7: Plain Text</h2>
+    <p>Plain text response (no highlighting)</p>
+    <http-console id="example7"></http-console>
+  </div>
+
+  <div class="demo-section">
+    <h2>Example 8: Binary Data (Image)</h2>
+    <p>Binary image response showing binary data indicator</p>
+    <http-console id="example8"></http-console>
+  </div>
+
+  <script type="module" src="../src/http-console.js"></script>
+  <script type="module">
+    // Wait for custom element to be defined
+    await customElements.whenDefined('http-console');
+
+    // Example 1: Simple GET request
+    document.getElementById('example1').data = {
+      request: {
+        method: 'GET',
+        url: '/api/users/123',
+        httpVersion: 'HTTP/1.1',
+        headers: {
+          'Host': 'api.example.com',
+          'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+        },
+        body: null
+      },
+      response: {
+        status: 200,
+        statusText: 'OK',
+        httpVersion: 'HTTP/1.1',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': '94',
+          'Date': 'Sat, 23 Nov 2025 10:00:00 GMT',
+          'Server': 'nginx/1.18.0'
+        },
+        body: JSON.stringify({
+          id: 123,
+          name: 'John Doe',
+          email: 'john.doe@example.com',
+          role: 'admin'
+        }, null, 2)
+      }
+    };
+
+    // Example 2: POST request with JSON body
+    document.getElementById('example2').data = {
+      request: {
+        method: 'POST',
+        url: '/api/users',
+        httpVersion: 'HTTP/1.1',
+        headers: {
+          'Host': 'api.example.com',
+          'Content-Type': 'application/json',
+          'Content-Length': '67',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          name: 'Jane Smith',
+          email: 'jane.smith@example.com',
+          role: 'user'
+        }, null, 2)
+      },
+      response: {
+        status: 201,
+        statusText: 'Created',
+        httpVersion: 'HTTP/1.1',
+        headers: {
+          'Content-Type': 'application/json',
+          'Location': '/api/users/124',
+          'Date': 'Sat, 23 Nov 2025 10:00:01 GMT'
+        },
+        body: JSON.stringify({
+          id: 124,
+          name: 'Jane Smith',
+          email: 'jane.smith@example.com',
+          role: 'user',
+          createdAt: '2025-11-23T10:00:01Z'
+        }, null, 2)
+      }
+    };
+
+    // Example 3: 404 Error response
+    document.getElementById('example3').data = {
+      request: {
+        method: 'GET',
+        url: '/api/users/999',
+        httpVersion: 'HTTP/1.1',
+        headers: {
+          'Host': 'api.example.com',
+          'Accept': 'application/json'
+        },
+        body: null
+      },
+      response: {
+        status: 404,
+        statusText: 'Not Found',
+        httpVersion: 'HTTP/1.1',
+        headers: {
+          'Content-Type': 'application/json',
+          'Date': 'Sat, 23 Nov 2025 10:00:02 GMT'
+        },
+        body: JSON.stringify({
+          error: 'User not found',
+          code: 'USER_NOT_FOUND',
+          requestId: 'req_abc123'
+        }, null, 2)
+      }
+    };
+
+    // Example 4: HTML response
+    document.getElementById('example4').data = {
+      request: {
+        method: 'GET',
+        url: '/index.html',
+        httpVersion: 'HTTP/1.1',
+        headers: {
+          'Host': 'www.example.com',
+          'Accept': 'text/html',
+          'Accept-Language': 'en-US,en;q=0.9'
+        },
+        body: null
+      },
+      response: {
+        status: 200,
+        statusText: 'OK',
+        httpVersion: 'HTTP/1.1',
+        headers: {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Content-Length': '156',
+          'Date': 'Sat, 23 Nov 2025 10:00:03 GMT',
+          'Cache-Control': 'public, max-age=3600'
+        },
+        body: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Welcome</title>
+</head>
+<body>
+  <h1>Hello, World!</h1>
+  <p>Welcome to our website.</p>
+</body>
+</html>`
+      }
+    };
+
+    // Example 5: CSS response
+    document.getElementById('example5').data = {
+      request: {
+        method: 'GET',
+        url: '/styles/main.css',
+        httpVersion: 'HTTP/1.1',
+        headers: {
+          'Host': 'cdn.example.com',
+          'Accept': 'text/css'
+        },
+        body: null
+      },
+      response: {
+        status: 200,
+        statusText: 'OK',
+        httpVersion: 'HTTP/1.1',
+        headers: {
+          'Content-Type': 'text/css',
+          'Cache-Control': 'public, max-age=31536000',
+          'Date': 'Sat, 23 Nov 2025 10:00:04 GMT'
+        },
+        body: `/* Main stylesheet */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+#header {
+  background-color: #2563eb;
+  color: white;
+  padding: 1rem 2rem;
+}
+
+.btn-primary {
+  background: #059669;
+  border: none;
+  border-radius: 4px;
+}
+
+.text-center {
+  text-align: center;
+}`
+      }
+    };
+
+    // Example 6: JavaScript response
+    document.getElementById('example6').data = {
+      request: {
+        method: 'GET',
+        url: '/js/app.js',
+        httpVersion: 'HTTP/1.1',
+        headers: {
+          'Host': 'cdn.example.com',
+          'Accept': '*/*'
+        },
+        body: null
+      },
+      response: {
+        status: 200,
+        statusText: 'OK',
+        httpVersion: 'HTTP/1.1',
+        headers: {
+          'Content-Type': 'application/javascript',
+          'Cache-Control': 'public, max-age=31536000',
+          'Date': 'Sat, 23 Nov 2025 10:00:05 GMT'
+        },
+        body: `// Application initialization
+const API_URL = 'https://api.example.com';
+
+async function fetchUserData(userId) {
+  try {
+    const response = await fetch(\`\${API_URL}/users/\${userId}\`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch user');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error:', error);
+    return null;
+  }
+}
+
+class UserManager {
+  constructor(apiUrl) {
+    this.apiUrl = apiUrl;
+    this.users = [];
+  }
+
+  async loadUsers() {
+    // Load all users
+    const users = await fetchUserData(123);
+    this.users = users;
+  }
+}`
+      }
+    };
+
+    // Example 7: Plain text response
+    document.getElementById('example7').data = {
+      request: {
+        method: 'GET',
+        url: '/logs/access.log',
+        httpVersion: 'HTTP/1.1',
+        headers: {
+          'Host': 'logs.example.com',
+          'Accept': '*/*'
+        },
+        body: null
+      },
+      response: {
+        status: 200,
+        statusText: 'OK',
+        httpVersion: 'HTTP/1.1',
+        headers: {
+          'Content-Type': 'text/plain',
+          'Date': 'Sat, 23 Nov 2025 10:00:06 GMT'
+        },
+        body: `127.0.0.1 - - [23/Nov/2025:10:00:00 +0000] "GET /index.html HTTP/1.1" 200 1234
+192.168.1.100 - - [23/Nov/2025:10:00:01 +0000] "POST /api/users HTTP/1.1" 201 567
+10.0.0.5 - - [23/Nov/2025:10:00:02 +0000] "GET /styles.css HTTP/1.1" 200 8901
+172.16.0.20 - - [23/Nov/2025:10:00:03 +0000] "GET /api/products HTTP/1.1" 200 4567`
+      }
+    };
+
+    // Example 8: Binary data (image)
+    document.getElementById('example8').data = {
+      request: {
+        method: 'GET',
+        url: '/images/logo.png',
+        httpVersion: 'HTTP/1.1',
+        headers: {
+          'Host': 'cdn.example.com',
+          'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8'
+        },
+        body: null
+      },
+      response: {
+        status: 200,
+        statusText: 'OK',
+        httpVersion: 'HTTP/1.1',
+        headers: {
+          'Content-Type': 'image/png',
+          'Content-Length': '45832',
+          'Cache-Control': 'public, max-age=31536000',
+          'Date': 'Sat, 23 Nov 2025 10:00:07 GMT'
+        },
+        body: '\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x01\x00\x00\x00\x01\x00\x08\x06' + '...'.repeat(1500)
+      }
+    };
+
+    // Theme toggle functionality
+    // Initialize based on system preference
+    let isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    // Set initial button text and body background
+    window.addEventListener('load', () => {
+      const button = document.querySelector('.theme-toggle');
+      button.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+      document.body.style.background = isDark ? '#1f2937' : '#fafafa';
+    });
+
+    window.toggleTheme = function() {
+      isDark = !isDark;
+      const theme = isDark ? 'dark' : 'light';
+      const button = document.querySelector('.theme-toggle');
+
+      // Update all http-console elements
+      document.querySelectorAll('http-console').forEach(el => {
+        el.setAttribute('theme', theme);
+      });
+
+      // Update button text
+      button.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+
+      // Update body background and text colors
+      document.body.style.background = isDark ? '#1f2937' : '#fafafa';
+      document.body.style.color = isDark ? '#f3f4f6' : '#1f2937';
+
+      // Update headings
+      document.querySelectorAll('h1, h2, h3').forEach(el => {
+        el.style.color = isDark ? '#f3f4f6' : '#1f2937';
+      });
+
+      // Update subtitle
+      document.querySelectorAll('.subtitle').forEach(el => {
+        el.style.color = isDark ? '#9ca3af' : '#6b7280';
+      });
+
+      // Update demo sections
+      document.querySelectorAll('.demo-section p').forEach(el => {
+        el.style.color = isDark ? '#9ca3af' : '#6b7280';
+      });
+
+      document.querySelectorAll('.demo-section h2').forEach(el => {
+        el.style.borderColor = isDark ? '#4b5563' : '#e5e7eb';
+      });
+    };
+  </script>
+</body>
+</html>
