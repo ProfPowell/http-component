@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTTP Request Explorer - Interactive Request Builder</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+
+      h1 {
+        color: #333;
+        border-bottom: 3px solid #2563eb;
+        padding-bottom: 10px;
+      }
+
+      .intro {
+        background: white;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .intro h2 {
+        margin-top: 0;
+        color: #2563eb;
+      }
+
+      .intro ul {
+        line-height: 1.8;
+      }
+
+      code {
+        background: #f1f3f5;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9em;
+        color: #d73a49;
+      }
+
+      .examples {
+        background: white;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .examples h2 {
+        margin-top: 0;
+        color: #2563eb;
+      }
+
+      .example-item {
+        margin: 15px 0;
+        padding: 12px;
+        background: #f8f9fa;
+        border-left: 4px solid #2563eb;
+        border-radius: 4px;
+      }
+
+      .example-item strong {
+        color: #2563eb;
+      }
+
+      http-explorer {
+        margin: 20px 0;
+      }
+
+      .note {
+        background: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        padding: 12px 16px;
+        margin: 20px 0;
+        border-radius: 4px;
+      }
+
+      .note strong {
+        color: #92400e;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>HTTP Request Explorer</h1>
+
+    <div class="intro">
+      <h2>Interactive HTTP Request Builder</h2>
+      <p>
+        The <code>&lt;http-explorer&gt;</code> component provides an interactive interface for
+        building and sending HTTP requests. Perfect for:
+      </p>
+      <ul>
+        <li>🎓 Teaching HTTP protocol and REST APIs</li>
+        <li>🧪 Testing API endpoints during development</li>
+        <li>📚 Creating interactive API documentation</li>
+        <li>🔍 Debugging request/response cycles</li>
+        <li>💡 Learning how HTTP methods, headers, and bodies work</li>
+      </ul>
+
+      <div class="note">
+        <strong>CORS Notice:</strong> Due to browser security, you can only make requests to APIs
+        that allow CORS (Cross-Origin Resource Sharing) from this domain. Many public APIs like
+        JSONPlaceholder, httpbin.org, and RESTful test APIs work well.
+      </div>
+    </div>
+
+    <div class="examples">
+      <h2>Try These Example APIs</h2>
+
+      <div class="example-item">
+        <strong>GET Request:</strong> Fetch user data<br />
+        <code>https://jsonplaceholder.typicode.com/users/1</code>
+      </div>
+
+      <div class="example-item">
+        <strong>POST Request:</strong> Create a new post<br />
+        <code>https://jsonplaceholder.typicode.com/posts</code><br />
+        Body:
+        <code>{"title": "My Post", "body": "Content here", "userId": 1}</code>
+      </div>
+
+      <div class="example-item">
+        <strong>Test Request/Response:</strong> Echo service<br />
+        <code>https://httpbin.org/anything</code><br />
+        Try any method - it echoes back your request details
+      </div>
+
+      <div class="example-item">
+        <strong>Headers Test:</strong> View headers<br />
+        <code>https://httpbin.org/headers</code><br />
+        Add custom headers to see them in the response
+      </div>
+    </div>
+
+    <http-explorer url="https://jsonplaceholder.typicode.com/users/1"></http-explorer>
+
+    <script type="module">
+      import '../src/http-explorer.js';
+
+      // Listen to events
+      const explorer = document.querySelector('http-explorer');
+
+      explorer.addEventListener('request-sent', event => {
+        console.log('Request sent:', event.detail);
+      });
+
+      explorer.addEventListener('response-received', event => {
+        console.log('Response received:', event.detail);
+      });
+
+      explorer.addEventListener('request-error', event => {
+        console.error('Request error:', event.detail);
+      });
+    </script>
+  </body>
+</html>

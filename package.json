@@ -22,6 +22,10 @@
     "./http-interceptor": {
       "types": "./src/http-interceptor.d.ts",
       "default": "./src/http-interceptor.js"
+    },
+    "./http-explorer": {
+      "types": "./src/http-explorer.d.ts",
+      "default": "./src/http-explorer.js"
     }
   },
   "files": [
