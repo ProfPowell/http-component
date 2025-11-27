@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTTP Console - Highlight Demo</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #f8f9fa;
+        padding: 40px 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        font-size: 2rem;
+        margin-bottom: 12px;
+        color: #1f2937;
+      }
+
+      .subtitle {
+        color: #6b7280;
+        margin-bottom: 40px;
+      }
+
+      .demo-section {
+        background: white;
+        border-radius: 8px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      h2 {
+        font-size: 1.25rem;
+        margin-bottom: 8px;
+        color: #111827;
+      }
+
+      .description {
+        color: #6b7280;
+        margin-bottom: 16px;
+        font-size: 0.875rem;
+      }
+
+      code {
+        background: #f3f4f6;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.875rem;
+      }
+
+      http-console {
+        display: block;
+        margin-top: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🎨 HTTP Console - Highlighting Sections</h1>
+      <p class="subtitle">
+        Use the <code>highlight</code> attribute to emphasize specific parts of the HTTP exchange
+      </p>
+
+      <div class="demo-section">
+        <h2>1. Highlight Response Status Line</h2>
+        <p class="description">
+          Perfect for drawing attention to the response status:<br />
+          <code>&lt;http-console highlight="response-line"&gt;&lt;/http-console&gt;</code>
+        </p>
+        <http-console id="demo1" highlight="response-line"></http-console>
+      </div>
+
+      <div class="demo-section">
+        <h2>2. Highlight Response Headers</h2>
+        <p class="description">
+          Focus on the response headers:<br />
+          <code>&lt;http-console highlight="response-headers"&gt;&lt;/http-console&gt;</code>
+        </p>
+        <http-console id="demo2" highlight="response-headers"></http-console>
+      </div>
+
+      <div class="demo-section">
+        <h2>3. Highlight Response Body</h2>
+        <p class="description">
+          Emphasize the response body content:<br />
+          <code>&lt;http-console highlight="response-body"&gt;&lt;/http-console&gt;</code>
+        </p>
+        <http-console id="demo3" highlight="response-body"></http-console>
+      </div>
+
+      <div class="demo-section">
+        <h2>4. Highlight Multiple Sections</h2>
+        <p class="description">
+          You can highlight multiple sections using comma-separated values:<br />
+          <code
+            >&lt;http-console
+            highlight="response-line,response-headers"&gt;&lt;/http-console&gt;</code
+          >
+        </p>
+        <http-console id="demo4" highlight="response-line,response-headers"></http-console>
+      </div>
+
+      <div class="demo-section">
+        <h2>5. Highlight Request Sections</h2>
+        <p class="description">
+          Works with request sections too:<br />
+          <code
+            >&lt;http-console highlight="request-line,request-body"&gt;&lt;/http-console&gt;</code
+          >
+        </p>
+        <http-console id="demo5" highlight="request-line,request-body"></http-console>
+      </div>
+
+      <div class="demo-section">
+        <h2>6. Full Example - Multiple Highlights</h2>
+        <p class="description">
+          Highlight both request and response sections:<br />
+          <code
+            >&lt;http-console
+            highlight="request-headers,response-line,response-body"&gt;&lt;/http-console&gt;</code
+          >
+        </p>
+        <http-console
+          id="demo6"
+          highlight="request-headers,response-line,response-body"
+        ></http-console>
+      </div>
+
+      <div class="demo-section">
+        <h2>7. Highlight Specific Request Header</h2>
+        <p class="description">
+          Highlight only the Content-Type request header:<br />
+          <code
+            >&lt;http-console highlight="request-header:Content-Type"&gt;&lt;/http-console&gt;</code
+          >
+        </p>
+        <http-console id="demo7" highlight="request-header:Content-Type"></http-console>
+      </div>
+
+      <div class="demo-section">
+        <h2>8. Highlight Specific Response Header</h2>
+        <p class="description">
+          Highlight only the Location response header:<br />
+          <code
+            >&lt;http-console highlight="response-header:Location"&gt;&lt;/http-console&gt;</code
+          >
+        </p>
+        <http-console id="demo8" highlight="response-header:Location"></http-console>
+      </div>
+
+      <div class="demo-section">
+        <h2>9. Highlight Multiple Specific Headers</h2>
+        <p class="description">
+          Highlight Authorization request header and Content-Type response header:<br />
+          <code
+            >&lt;http-console
+            highlight="request-header:Authorization,response-header:Content-Type"&gt;&lt;/http-console&gt;</code
+          >
+        </p>
+        <http-console
+          id="demo9"
+          highlight="request-header:Authorization,response-header:Content-Type"
+        ></http-console>
+      </div>
+
+      <div class="demo-section">
+        <h2>10. Mix Sections and Specific Headers</h2>
+        <p class="description">
+          Combine section and specific header highlighting:<br />
+          <code
+            >&lt;http-console
+            highlight="response-line,request-header:Content-Type,response-header:Location"&gt;&lt;/http-console&gt;</code
+          >
+        </p>
+        <http-console
+          id="demo10"
+          highlight="response-line,request-header:Content-Type,response-header:Location"
+        ></http-console>
+      </div>
+    </div>
+
+    <script type="module">
+      import '../src/http-console.js';
+
+      // Wait for component to be ready
+      await customElements.whenDefined('http-console');
+
+      const sampleData = {
+        request: {
+          method: 'POST',
+          url: '/api/users',
+          httpVersion: 'HTTP/1.1',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+          },
+          body: JSON.stringify(
+            {
+              name: 'Alice Johnson',
+              email: 'alice@example.com',
+              role: 'developer',
+            },
+            null,
+            2
+          ),
+        },
+        response: {
+          status: 201,
+          statusText: 'Created',
+          httpVersion: 'HTTP/1.1',
+          headers: {
+            'Content-Type': 'application/json',
+            Location: '/api/users/42',
+            'X-Request-ID': 'req_abc123',
+          },
+          body: JSON.stringify(
+            {
+              id: 42,
+              name: 'Alice Johnson',
+              email: 'alice@example.com',
+              role: 'developer',
+              createdAt: '2024-01-15T10:30:00Z',
+            },
+            null,
+            2
+          ),
+        },
+      };
+
+      // Apply same data to all demos
+      for (let i = 1; i <= 10; i++) {
+        document.getElementById(`demo${i}`).data = sampleData;
+      }
+    </script>
+  </body>
+</html>
