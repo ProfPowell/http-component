@@ -377,6 +377,41 @@ mark.highlight {
   padding-left: 6px;
 }
 
+/* Box styles for bordered sections with labels */
+.http-box {
+  position: relative;
+  border: 2px solid #2563eb;
+  border-radius: 6px;
+  padding: 20px 12px 12px 12px;
+  margin: 8px 0;
+  background: rgba(37, 99, 235, 0.02);
+}
+
+.http-box-label {
+  position: absolute;
+  top: -10px;
+  left: 12px;
+  background: var(--bg-secondary);
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #2563eb;
+  border-radius: 3px;
+  border: 2px solid #2563eb;
+}
+
+:host([theme='dark']) .http-box {
+  border-color: #60a5fa;
+  background: rgba(96, 165, 250, 0.05);
+}
+
+:host([theme='dark']) .http-box-label {
+  color: #60a5fa;
+  border-color: #60a5fa;
+}
+
 /* Responsive layout for smaller screens */
 @media (max-width: 768px) {
   .http-console {
@@ -465,7 +500,7 @@ class HTTPConsoleElement extends HTMLElement {
    * @returns {string[]} Array of observed attribute names
    */
   static get observedAttributes() {
-    return ['request', 'response', 'theme', 'highlight'];
+    return ['request', 'response', 'theme', 'highlight', 'box'];
   }
 
   /**
@@ -668,6 +703,151 @@ class HTTPConsoleElement extends HTMLElement {
   }
 
   /**
+   * Parse box attribute into a structured object for boxing sections and individual headers
+   * Accepts comma-separated values like:
+   * - "request-line,response-headers,response-body" (sections)
+   * - "request-header:Content-Type" (specific request header)
+   * - "response-header:Authorization" (specific response header)
+   * - Mixed: "request-line,response-header:Content-Type,response-body"
+   * @returns {Object} Box configuration object
+   * @property {Set<string>} sections - Non-header sections to box
+   * @property {boolean} allRequestHeaders - Whether to box all request headers
+   * @property {boolean} allResponseHeaders - Whether to box all response headers
+   * @property {Set<string>} specificRequestHeaders - Set of specific request header names (normalized to lowercase)
+   * @property {Set<string>} specificResponseHeaders - Set of specific response header names (normalized to lowercase)
+   * @memberof HTTPConsoleElement
+   * @private
+   */
+  getBoxedSections() {
+    const boxAttr = this.getAttribute('box');
+    if (!boxAttr) {
+      return {
+        sections: new Set(),
+        allRequestHeaders: false,
+        allResponseHeaders: false,
+        specificRequestHeaders: new Set(),
+        specificResponseHeaders: new Set(),
+      };
+    }
+
+    const sections = new Set();
+    let allRequestHeaders = false;
+    let allResponseHeaders = false;
+    const specificRequestHeaders = new Set();
+    const specificResponseHeaders = new Set();
+
+    const parts = boxAttr
+      .split(',')
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
+
+    for (const part of parts) {
+      if (part === 'request-headers') {
+        allRequestHeaders = true;
+      } else if (part === 'response-headers') {
+        allResponseHeaders = true;
+      } else if (part.startsWith('request-header:')) {
+        const headerName = part.substring('request-header:'.length).trim().toLowerCase();
+        if (headerName) {
+          specificRequestHeaders.add(headerName);
+        }
+      } else if (part.startsWith('response-header:')) {
+        const headerName = part.substring('response-header:'.length).trim().toLowerCase();
+        if (headerName) {
+          specificResponseHeaders.add(headerName);
+        }
+      } else {
+        sections.add(part);
+      }
+    }
+
+    return {
+      sections,
+      allRequestHeaders,
+      allResponseHeaders,
+      specificRequestHeaders,
+      specificResponseHeaders,
+    };
+  }
+
+  /**
+   * Check if a specific section should be boxed
+   * @param {string} section - Section name (e.g., 'request-line', 'response-body')
+   * @returns {boolean} True if section should be boxed
+   * @memberof HTTPConsoleElement
+   * @private
+   */
+  isBoxed(section) {
+    const boxed = this.getBoxedSections();
+    return boxed.sections.has(section);
+  }
+
+  /**
+   * Check if all request headers should be boxed together
+   * @returns {boolean} True if all request headers should be boxed
+   * @memberof HTTPConsoleElement
+   * @private
+   */
+  isRequestHeadersBoxed() {
+    const boxed = this.getBoxedSections();
+    return boxed.allRequestHeaders;
+  }
+
+  /**
+   * Check if all response headers should be boxed together
+   * @returns {boolean} True if all response headers should be boxed
+   * @memberof HTTPConsoleElement
+   * @private
+   */
+  isResponseHeadersBoxed() {
+    const boxed = this.getBoxedSections();
+    return boxed.allResponseHeaders;
+  }
+
+  /**
+   * Check if a specific request header should be boxed
+   * @param {string} headerName - Header name to check
+   * @returns {boolean} True if header should be boxed
+   * @memberof HTTPConsoleElement
+   * @private
+   */
+  isRequestHeaderBoxed(headerName) {
+    const boxed = this.getBoxedSections();
+    return boxed.specificRequestHeaders.has(headerName.toLowerCase());
+  }
+
+  /**
+   * Check if a specific response header should be boxed
+   * @param {string} headerName - Header name to check
+   * @returns {boolean} True if header should be boxed
+   * @memberof HTTPConsoleElement
+   * @private
+   */
+  isResponseHeaderBoxed(headerName) {
+    const boxed = this.getBoxedSections();
+    return boxed.specificResponseHeaders.has(headerName.toLowerCase());
+  }
+
+  /**
+   * Get the label text for a boxed section
+   * @param {string} section - Section name
+   * @returns {string} Label text for the box
+   * @memberof HTTPConsoleElement
+   * @private
+   */
+  getBoxLabel(section) {
+    const labels = {
+      'request-line': 'Request Line',
+      'request-headers': 'Request Headers',
+      'request-body': 'Request Body',
+      'response-line': 'Response Line',
+      'response-headers': 'Response Headers',
+      'response-body': 'Response Body',
+    };
+    return labels[section] || section;
+  }
+
+  /**
    * Render the component's shadow DOM
    * Only renders sections for which data is provided
    * @memberof HTTPConsoleElement
@@ -739,11 +919,23 @@ class HTTPConsoleElement extends HTMLElement {
     requestLine += `<span class="http-version">${httpVersion}</span>`;
 
     const lineHighlighted = this.isHighlighted('request-line');
-    content += lineHighlighted
-      ? `<mark class="highlight">${requestLine}</mark>\n`
-      : `${requestLine}\n`;
+    const lineBoxed = this.isBoxed('request-line');
 
-    // Headers
+    if (lineBoxed) {
+      const highlighted = lineHighlighted
+        ? `<mark class="highlight">${requestLine}</mark>`
+        : requestLine;
+      content += `<div class="http-box"><div class="http-box-label">${this.getBoxLabel('request-line')}</div>${highlighted}\n</div>`;
+    } else {
+      content += lineHighlighted
+        ? `<mark class="highlight">${requestLine}</mark>\n`
+        : `${requestLine}\n`;
+    }
+
+    // Headers - check if all headers should be boxed together
+    const allHeadersBoxed = this.isRequestHeadersBoxed();
+    let headersContent = '';
+
     for (const [key, value] of Object.entries(headers)) {
       let headerLine = `<span class="http-header-name">${this.escapeHtml(key)}</span>: `;
       if (key.toLowerCase() === 'content-type') {
@@ -753,9 +945,28 @@ class HTTPConsoleElement extends HTMLElement {
       }
       headerLine += '\n';
 
-      // Check if this specific header should be highlighted
       const isHeaderHighlighted = this.isRequestHeaderHighlighted(key);
-      content += isHeaderHighlighted ? `<mark class="highlight">${headerLine}</mark>` : headerLine;
+      const isHeaderBoxed = this.isRequestHeaderBoxed(key);
+
+      let processedLine = isHeaderHighlighted
+        ? `<mark class="highlight">${headerLine}</mark>`
+        : headerLine;
+
+      if (isHeaderBoxed && !allHeadersBoxed) {
+        // Box individual header
+        const headerLabel = key;
+        headersContent += `<div class="http-box"><div class="http-box-label">${headerLabel}</div>${processedLine}</div>`;
+      } else {
+        headersContent += processedLine;
+      }
+    }
+
+    if (headersContent) {
+      if (allHeadersBoxed) {
+        content += `<div class="http-box"><div class="http-box-label">${this.getBoxLabel('request-headers')}</div>${headersContent}</div>`;
+      } else {
+        content += headersContent;
+      }
     }
 
     // Body
@@ -763,7 +974,17 @@ class HTTPConsoleElement extends HTMLElement {
       content += '\n';
       const bodyContent = this.formatBody(body, headers);
       const bodyHighlighted = this.isHighlighted('request-body');
-      content += bodyHighlighted ? `<mark class="highlight">${bodyContent}</mark>` : bodyContent;
+      const bodyBoxed = this.isBoxed('request-body');
+
+      const processedBody = bodyHighlighted
+        ? `<mark class="highlight">${bodyContent}</mark>`
+        : bodyContent;
+
+      if (bodyBoxed) {
+        content += `<div class="http-box"><div class="http-box-label">${this.getBoxLabel('request-body')}</div>${processedBody}\n</div>`;
+      } else {
+        content += processedBody;
+      }
     }
 
     return `<pre>${content}</pre>`;
@@ -792,11 +1013,23 @@ class HTTPConsoleElement extends HTMLElement {
     statusLine += `<span class="http-reason-phrase">${this.escapeHtml(statusText)}</span>`;
 
     const lineHighlighted = this.isHighlighted('response-line');
-    content += lineHighlighted
-      ? `<mark class="highlight">${statusLine}</mark>\n`
-      : `${statusLine}\n`;
+    const lineBoxed = this.isBoxed('response-line');
 
-    // Headers
+    if (lineBoxed) {
+      const highlighted = lineHighlighted
+        ? `<mark class="highlight">${statusLine}</mark>`
+        : statusLine;
+      content += `<div class="http-box"><div class="http-box-label">${this.getBoxLabel('response-line')}</div>${highlighted}\n</div>`;
+    } else {
+      content += lineHighlighted
+        ? `<mark class="highlight">${statusLine}</mark>\n`
+        : `${statusLine}\n`;
+    }
+
+    // Headers - check if all headers should be boxed together
+    const allHeadersBoxed = this.isResponseHeadersBoxed();
+    let headersContent = '';
+
     for (const [key, value] of Object.entries(headers)) {
       let headerLine = `<span class="http-header-name">${this.escapeHtml(key)}</span>: `;
       if (key.toLowerCase() === 'content-type') {
@@ -806,9 +1039,28 @@ class HTTPConsoleElement extends HTMLElement {
       }
       headerLine += '\n';
 
-      // Check if this specific header should be highlighted
       const isHeaderHighlighted = this.isResponseHeaderHighlighted(key);
-      content += isHeaderHighlighted ? `<mark class="highlight">${headerLine}</mark>` : headerLine;
+      const isHeaderBoxed = this.isResponseHeaderBoxed(key);
+
+      let processedLine = isHeaderHighlighted
+        ? `<mark class="highlight">${headerLine}</mark>`
+        : headerLine;
+
+      if (isHeaderBoxed && !allHeadersBoxed) {
+        // Box individual header
+        const headerLabel = key;
+        headersContent += `<div class="http-box"><div class="http-box-label">${headerLabel}</div>${processedLine}</div>`;
+      } else {
+        headersContent += processedLine;
+      }
+    }
+
+    if (headersContent) {
+      if (allHeadersBoxed) {
+        content += `<div class="http-box"><div class="http-box-label">${this.getBoxLabel('response-headers')}</div>${headersContent}</div>`;
+      } else {
+        content += headersContent;
+      }
     }
 
     // Body
@@ -816,7 +1068,17 @@ class HTTPConsoleElement extends HTMLElement {
       content += '\n';
       const bodyContent = this.formatBody(body, headers);
       const bodyHighlighted = this.isHighlighted('response-body');
-      content += bodyHighlighted ? `<mark class="highlight">${bodyContent}</mark>` : bodyContent;
+      const bodyBoxed = this.isBoxed('response-body');
+
+      const processedBody = bodyHighlighted
+        ? `<mark class="highlight">${bodyContent}</mark>`
+        : bodyContent;
+
+      if (bodyBoxed) {
+        content += `<div class="http-box"><div class="http-box-label">${this.getBoxLabel('response-body')}</div>${processedBody}\n</div>`;
+      } else {
+        content += processedBody;
+      }
     }
 
     return `<pre>${content}</pre>`;
