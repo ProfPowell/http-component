@@ -558,38 +558,113 @@ class HTTPConsoleElement extends HTMLElement {
   }
 
   /**
-   * Parse highlight attribute into a Set of sections to highlight
-   * Accepts comma-separated values like "request-line,response-headers,response-body"
-   * Valid values: request-line, request-headers, request-body,
-   *               response-line, response-headers, response-body
-   * @returns {Set<string>} Set of sections to highlight
+   * Parse highlight attribute into a structured object for highlighting sections and individual headers
+   * Accepts comma-separated values like:
+   * - "request-line,response-headers,response-body" (sections)
+   * - "request-header:Content-Type" (specific request header)
+   * - "response-header:Authorization" (specific response header)
+   * - Mixed: "request-line,response-header:Content-Type,response-body"
+   * @returns {Object} Highlight configuration object
+   * @property {Set<string>} sections - Non-header sections to highlight
+   * @property {boolean} allRequestHeaders - Whether to highlight all request headers
+   * @property {boolean} allResponseHeaders - Whether to highlight all response headers
+   * @property {Set<string>} specificRequestHeaders - Set of specific request header names (normalized to lowercase)
+   * @property {Set<string>} specificResponseHeaders - Set of specific response header names (normalized to lowercase)
    * @memberof HTTPConsoleElement
    * @private
    */
   getHighlightedSections() {
     const highlightAttr = this.getAttribute('highlight');
     if (!highlightAttr) {
-      return new Set();
+      return {
+        sections: new Set(),
+        allRequestHeaders: false,
+        allResponseHeaders: false,
+        specificRequestHeaders: new Set(),
+        specificResponseHeaders: new Set(),
+      };
     }
 
-    return new Set(
-      highlightAttr
-        .split(',')
-        .map(s => s.trim())
-        .filter(s => s.length > 0)
-    );
+    const sections = new Set();
+    let allRequestHeaders = false;
+    let allResponseHeaders = false;
+    const specificRequestHeaders = new Set();
+    const specificResponseHeaders = new Set();
+
+    const parts = highlightAttr
+      .split(',')
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
+
+    for (const part of parts) {
+      if (part === 'request-headers') {
+        allRequestHeaders = true;
+      } else if (part === 'response-headers') {
+        allResponseHeaders = true;
+      } else if (part.startsWith('request-header:')) {
+        const headerName = part.substring('request-header:'.length).trim().toLowerCase();
+        if (headerName) {
+          specificRequestHeaders.add(headerName);
+        }
+      } else if (part.startsWith('response-header:')) {
+        const headerName = part.substring('response-header:'.length).trim().toLowerCase();
+        if (headerName) {
+          specificResponseHeaders.add(headerName);
+        }
+      } else {
+        sections.add(part);
+      }
+    }
+
+    return {
+      sections,
+      allRequestHeaders,
+      allResponseHeaders,
+      specificRequestHeaders,
+      specificResponseHeaders,
+    };
   }
 
   /**
    * Check if a specific section should be highlighted
-   * @param {string} section - Section name (e.g., 'request-line', 'response-headers')
+   * @param {string} section - Section name (e.g., 'request-line', 'response-body')
    * @returns {boolean} True if section should be highlighted
    * @memberof HTTPConsoleElement
    * @private
    */
   isHighlighted(section) {
     const highlighted = this.getHighlightedSections();
-    return highlighted.has(section);
+    return highlighted.sections.has(section);
+  }
+
+  /**
+   * Check if a specific request header should be highlighted
+   * @param {string} headerName - Header name to check
+   * @returns {boolean} True if header should be highlighted
+   * @memberof HTTPConsoleElement
+   * @private
+   */
+  isRequestHeaderHighlighted(headerName) {
+    const highlighted = this.getHighlightedSections();
+    return (
+      highlighted.allRequestHeaders ||
+      highlighted.specificRequestHeaders.has(headerName.toLowerCase())
+    );
+  }
+
+  /**
+   * Check if a specific response header should be highlighted
+   * @param {string} headerName - Header name to check
+   * @returns {boolean} True if header should be highlighted
+   * @memberof HTTPConsoleElement
+   * @private
+   */
+  isResponseHeaderHighlighted(headerName) {
+    const highlighted = this.getHighlightedSections();
+    return (
+      highlighted.allResponseHeaders ||
+      highlighted.specificResponseHeaders.has(headerName.toLowerCase())
+    );
   }
 
   /**
@@ -647,22 +722,18 @@ class HTTPConsoleElement extends HTMLElement {
       : `${requestLine}\n`;
 
     // Headers
-    let headersContent = '';
     for (const [key, value] of Object.entries(headers)) {
-      headersContent += `<span class="http-header-name">${this.escapeHtml(key)}</span>: `;
+      let headerLine = `<span class="http-header-name">${this.escapeHtml(key)}</span>: `;
       if (key.toLowerCase() === 'content-type') {
-        headersContent += this.highlightContentType(value);
+        headerLine += this.highlightContentType(value);
       } else {
-        headersContent += `<span class="http-header-value">${this.escapeHtml(value)}</span>`;
+        headerLine += `<span class="http-header-value">${this.escapeHtml(value)}</span>`;
       }
-      headersContent += '\n';
-    }
+      headerLine += '\n';
 
-    if (headersContent) {
-      const headersHighlighted = this.isHighlighted('request-headers');
-      content += headersHighlighted
-        ? `<mark class="highlight">${headersContent}</mark>`
-        : headersContent;
+      // Check if this specific header should be highlighted
+      const isHeaderHighlighted = this.isRequestHeaderHighlighted(key);
+      content += isHeaderHighlighted ? `<mark class="highlight">${headerLine}</mark>` : headerLine;
     }
 
     // Body
@@ -704,22 +775,18 @@ class HTTPConsoleElement extends HTMLElement {
       : `${statusLine}\n`;
 
     // Headers
-    let headersContent = '';
     for (const [key, value] of Object.entries(headers)) {
-      headersContent += `<span class="http-header-name">${this.escapeHtml(key)}</span>: `;
+      let headerLine = `<span class="http-header-name">${this.escapeHtml(key)}</span>: `;
       if (key.toLowerCase() === 'content-type') {
-        headersContent += this.highlightContentType(value);
+        headerLine += this.highlightContentType(value);
       } else {
-        headersContent += `<span class="http-header-value">${this.escapeHtml(value)}</span>`;
+        headerLine += `<span class="http-header-value">${this.escapeHtml(value)}</span>`;
       }
-      headersContent += '\n';
-    }
+      headerLine += '\n';
 
-    if (headersContent) {
-      const headersHighlighted = this.isHighlighted('response-headers');
-      content += headersHighlighted
-        ? `<mark class="highlight">${headersContent}</mark>`
-        : headersContent;
+      // Check if this specific header should be highlighted
+      const isHeaderHighlighted = this.isResponseHeaderHighlighted(key);
+      content += isHeaderHighlighted ? `<mark class="highlight">${headerLine}</mark>` : headerLine;
     }
 
     // Body

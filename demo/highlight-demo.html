@@ -138,6 +138,58 @@
           highlight="request-headers,response-line,response-body"
         ></http-console>
       </div>
+
+      <div class="demo-section">
+        <h2>7. Highlight Specific Request Header</h2>
+        <p class="description">
+          Highlight only the Content-Type request header:<br />
+          <code
+            >&lt;http-console highlight="request-header:Content-Type"&gt;&lt;/http-console&gt;</code
+          >
+        </p>
+        <http-console id="demo7" highlight="request-header:Content-Type"></http-console>
+      </div>
+
+      <div class="demo-section">
+        <h2>8. Highlight Specific Response Header</h2>
+        <p class="description">
+          Highlight only the Location response header:<br />
+          <code
+            >&lt;http-console highlight="response-header:Location"&gt;&lt;/http-console&gt;</code
+          >
+        </p>
+        <http-console id="demo8" highlight="response-header:Location"></http-console>
+      </div>
+
+      <div class="demo-section">
+        <h2>9. Highlight Multiple Specific Headers</h2>
+        <p class="description">
+          Highlight Authorization request header and Content-Type response header:<br />
+          <code
+            >&lt;http-console
+            highlight="request-header:Authorization,response-header:Content-Type"&gt;&lt;/http-console&gt;</code
+          >
+        </p>
+        <http-console
+          id="demo9"
+          highlight="request-header:Authorization,response-header:Content-Type"
+        ></http-console>
+      </div>
+
+      <div class="demo-section">
+        <h2>10. Mix Sections and Specific Headers</h2>
+        <p class="description">
+          Combine section and specific header highlighting:<br />
+          <code
+            >&lt;http-console
+            highlight="response-line,request-header:Content-Type,response-header:Location"&gt;&lt;/http-console&gt;</code
+          >
+        </p>
+        <http-console
+          id="demo10"
+          highlight="response-line,request-header:Content-Type,response-header:Location"
+        ></http-console>
+      </div>
     </div>
 
     <script type="module">
@@ -190,7 +242,7 @@
       };
 
       // Apply same data to all demos
-      for (let i = 1; i <= 6; i++) {
+      for (let i = 1; i <= 10; i++) {
         document.getElementById(`demo${i}`).data = sampleData;
       }
     </script>

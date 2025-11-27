@@ -24,7 +24,7 @@ export interface HTTPExchange {
 }
 
 /**
- * Valid highlight section names
+ * Valid highlight section names for sections
  */
 export type HighlightSection =
   | 'request-line'
@@ -33,6 +33,21 @@ export type HighlightSection =
   | 'response-line'
   | 'response-headers'
   | 'response-body';
+
+/**
+ * Highlight value can be:
+ * - Section names: "request-line", "response-headers", etc.
+ * - Specific headers: "request-header:Content-Type", "response-header:Authorization"
+ * - Comma-separated combinations: "request-line,response-header:Content-Type,response-body"
+ *
+ * Examples:
+ * - "response-line" - Highlight only the response status line
+ * - "request-headers" - Highlight all request headers
+ * - "response-header:Content-Type" - Highlight only the Content-Type response header
+ * - "request-header:Authorization,response-header:Content-Type" - Highlight specific headers
+ * - "request-line,request-header:Content-Type,response-body" - Mixed highlighting
+ */
+export type HighlightValue = string;
 
 /**
  * Web component for displaying HTTP request/response data
