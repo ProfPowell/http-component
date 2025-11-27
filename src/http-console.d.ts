@@ -24,6 +24,17 @@ export interface HTTPExchange {
 }
 
 /**
+ * Valid highlight section names
+ */
+export type HighlightSection =
+  | 'request-line'
+  | 'request-headers'
+  | 'request-body'
+  | 'response-line'
+  | 'response-headers'
+  | 'response-body';
+
+/**
  * Web component for displaying HTTP request/response data
  * Displays data in raw HTTP wire format for educational purposes
  */
@@ -37,6 +48,12 @@ export class HTTPConsoleElement extends HTMLElement {
    * Theme mode: 'light', 'dark', or 'auto'
    */
   theme: 'light' | 'dark' | 'auto';
+
+  /**
+   * Comma-separated list of sections to highlight
+   * Example: "response-line,response-headers" or "request-body,response-body"
+   */
+  highlight: string;
 
   connectedCallback(): void;
   disconnectedCallback(): void;

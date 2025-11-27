@@ -359,6 +359,24 @@ const HTTP_CONSOLE_STYLES = `
   font-style: italic;
 }
 
+/* Highlight styles for emphasized sections */
+mark.highlight {
+  background: #fff3cd;
+  color: inherit;
+  padding: 2px 0;
+  margin: -2px 0;
+  border-radius: 2px;
+  display: inline;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+:host([theme='dark']) mark.highlight {
+  background: #664d03;
+  border-left: 3px solid #ffc107;
+  padding-left: 6px;
+}
+
 /* Responsive layout for smaller screens */
 @media (max-width: 768px) {
   .http-console {
@@ -447,7 +465,7 @@ class HTTPConsoleElement extends HTMLElement {
    * @returns {string[]} Array of observed attribute names
    */
   static get observedAttributes() {
-    return ['request', 'response', 'theme'];
+    return ['request', 'response', 'theme', 'highlight'];
   }
 
   /**
@@ -540,6 +558,41 @@ class HTTPConsoleElement extends HTMLElement {
   }
 
   /**
+   * Parse highlight attribute into a Set of sections to highlight
+   * Accepts comma-separated values like "request-line,response-headers,response-body"
+   * Valid values: request-line, request-headers, request-body,
+   *               response-line, response-headers, response-body
+   * @returns {Set<string>} Set of sections to highlight
+   * @memberof HTTPConsoleElement
+   * @private
+   */
+  getHighlightedSections() {
+    const highlightAttr = this.getAttribute('highlight');
+    if (!highlightAttr) {
+      return new Set();
+    }
+
+    return new Set(
+      highlightAttr
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s.length > 0)
+    );
+  }
+
+  /**
+   * Check if a specific section should be highlighted
+   * @param {string} section - Section name (e.g., 'request-line', 'response-headers')
+   * @returns {boolean} True if section should be highlighted
+   * @memberof HTTPConsoleElement
+   * @private
+   */
+  isHighlighted(section) {
+    const highlighted = this.getHighlightedSections();
+    return highlighted.has(section);
+  }
+
+  /**
    * Render the component's shadow DOM
    * @memberof HTTPConsoleElement
    * @private
@@ -580,28 +633,44 @@ class HTTPConsoleElement extends HTMLElement {
 
     const { method, url, httpVersion = 'HTTP/1.1', headers = {}, body = null } = request;
 
-    // Request line with highlighted method
-    const methodClass = `http-method-${method.toLowerCase()}`;
-    let content = `<span class="${methodClass}">${method}</span> `;
-    content += `<span class="http-url">${this.escapeHtml(url)}</span> `;
-    content += `<span class="http-version">${httpVersion}</span>\n`;
+    let content = '';
 
-    // Headers with highlighting
+    // Request line
+    const methodClass = `http-method-${method.toLowerCase()}`;
+    let requestLine = `<span class="${methodClass}">${method}</span> `;
+    requestLine += `<span class="http-url">${this.escapeHtml(url)}</span> `;
+    requestLine += `<span class="http-version">${httpVersion}</span>`;
+
+    const lineHighlighted = this.isHighlighted('request-line');
+    content += lineHighlighted
+      ? `<mark class="highlight">${requestLine}</mark>\n`
+      : `${requestLine}\n`;
+
+    // Headers
+    let headersContent = '';
     for (const [key, value] of Object.entries(headers)) {
-      content += `<span class="http-header-name">${this.escapeHtml(key)}</span>: `;
-      // Special highlighting for Content-Type (MIME type)
+      headersContent += `<span class="http-header-name">${this.escapeHtml(key)}</span>: `;
       if (key.toLowerCase() === 'content-type') {
-        content += this.highlightContentType(value);
+        headersContent += this.highlightContentType(value);
       } else {
-        content += `<span class="http-header-value">${this.escapeHtml(value)}</span>`;
+        headersContent += `<span class="http-header-value">${this.escapeHtml(value)}</span>`;
       }
-      content += '\n';
+      headersContent += '\n';
     }
 
-    // Add formatted body if present
+    if (headersContent) {
+      const headersHighlighted = this.isHighlighted('request-headers');
+      content += headersHighlighted
+        ? `<mark class="highlight">${headersContent}</mark>`
+        : headersContent;
+    }
+
+    // Body
     if (body) {
       content += '\n';
-      content += this.formatBody(body, headers);
+      const bodyContent = this.formatBody(body, headers);
+      const bodyHighlighted = this.isHighlighted('request-body');
+      content += bodyHighlighted ? `<mark class="highlight">${bodyContent}</mark>` : bodyContent;
     }
 
     return `<pre>${content}</pre>`;
@@ -621,28 +690,44 @@ class HTTPConsoleElement extends HTMLElement {
 
     const { status, statusText, httpVersion = 'HTTP/1.1', headers = {}, body = null } = response;
 
-    // Status line with highlighted status code
-    const statusClass = this.getStatusColorClass(status);
-    let content = `<span class="http-version">${httpVersion}</span> `;
-    content += `<span class="${statusClass}">${status}</span> `;
-    content += `<span class="http-reason-phrase">${this.escapeHtml(statusText)}</span>\n`;
+    let content = '';
 
-    // Headers with highlighting
+    // Status line
+    const statusClass = this.getStatusColorClass(status);
+    let statusLine = `<span class="http-version">${httpVersion}</span> `;
+    statusLine += `<span class="${statusClass}">${status}</span> `;
+    statusLine += `<span class="http-reason-phrase">${this.escapeHtml(statusText)}</span>`;
+
+    const lineHighlighted = this.isHighlighted('response-line');
+    content += lineHighlighted
+      ? `<mark class="highlight">${statusLine}</mark>\n`
+      : `${statusLine}\n`;
+
+    // Headers
+    let headersContent = '';
     for (const [key, value] of Object.entries(headers)) {
-      content += `<span class="http-header-name">${this.escapeHtml(key)}</span>: `;
-      // Special highlighting for Content-Type (MIME type)
+      headersContent += `<span class="http-header-name">${this.escapeHtml(key)}</span>: `;
       if (key.toLowerCase() === 'content-type') {
-        content += this.highlightContentType(value);
+        headersContent += this.highlightContentType(value);
       } else {
-        content += `<span class="http-header-value">${this.escapeHtml(value)}</span>`;
+        headersContent += `<span class="http-header-value">${this.escapeHtml(value)}</span>`;
       }
-      content += '\n';
+      headersContent += '\n';
     }
 
-    // Add formatted body if present
+    if (headersContent) {
+      const headersHighlighted = this.isHighlighted('response-headers');
+      content += headersHighlighted
+        ? `<mark class="highlight">${headersContent}</mark>`
+        : headersContent;
+    }
+
+    // Body
     if (body) {
       content += '\n';
-      content += this.formatBody(body, headers);
+      const bodyContent = this.formatBody(body, headers);
+      const bodyHighlighted = this.isHighlighted('response-body');
+      content += bodyHighlighted ? `<mark class="highlight">${bodyContent}</mark>` : bodyContent;
     }
 
     return `<pre>${content}</pre>`;
