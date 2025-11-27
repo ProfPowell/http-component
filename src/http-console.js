@@ -669,27 +669,49 @@ class HTTPConsoleElement extends HTMLElement {
 
   /**
    * Render the component's shadow DOM
+   * Only renders sections for which data is provided
    * @memberof HTTPConsoleElement
    * @private
    */
   render() {
     const data = this.getData();
+    const hasRequest = data.request !== null && data.request !== undefined;
+    const hasResponse = data.response !== null && data.response !== undefined;
 
-    this.shadowRoot.innerHTML = `
-      <style>${HTTP_CONSOLE_STYLES}</style>
-      <div class="http-console">
+    // Build sections conditionally
+    let sections = '';
+
+    if (hasRequest) {
+      sections += `
         <div class="http-section request-section">
           <div class="section-header">Request</div>
           <div class="http-content">
             ${this.renderRequest(data.request)}
           </div>
         </div>
+      `;
+    }
+
+    if (hasResponse) {
+      sections += `
         <div class="http-section response-section">
           <div class="section-header">Response</div>
           <div class="http-content">
             ${this.renderResponse(data.response)}
           </div>
         </div>
+      `;
+    }
+
+    // If neither request nor response, show a placeholder
+    if (!hasRequest && !hasResponse) {
+      sections = '<div class="empty" style="padding: 16px;">No HTTP data provided</div>';
+    }
+
+    this.shadowRoot.innerHTML = `
+      <style>${HTTP_CONSOLE_STYLES}</style>
+      <div class="http-console">
+        ${sections}
       </div>
     `;
   }
