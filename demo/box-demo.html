@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Box Demo - HTTP Console</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+
+      h1 {
+        color: #333;
+        border-bottom: 3px solid #2563eb;
+        padding-bottom: 10px;
+      }
+
+      .intro {
+        background: white;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .demo-section {
+        background: white;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .demo-section h2 {
+        margin-top: 0;
+        color: #2563eb;
+      }
+
+      .description {
+        color: #666;
+        margin-bottom: 20px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-left: 4px solid #2563eb;
+      }
+
+      code {
+        background: #f1f3f5;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9em;
+        color: #d73a49;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Box Feature Demo</h1>
+
+    <div class="intro">
+      <p>
+        The <code>box</code> attribute allows you to add visual borders with labels around different
+        sections of HTTP exchanges. This is useful for educational purposes, documentation, and
+        drawing attention to specific parts of the exchange.
+      </p>
+      <p><strong>Syntax:</strong> Same as highlight attribute</p>
+      <ul>
+        <li><code>box="response-line"</code> - Box the response status line</li>
+        <li><code>box="request-headers"</code> - Box all request headers together with a label</li>
+        <li><code>box="response-header:Content-Type"</code> - Box a specific header</li>
+        <li>
+          <code>box="request-line,request-headers,request-body"</code> - Box multiple sections
+        </li>
+      </ul>
+    </div>
+
+    <div class="demo-grid">
+      <div class="demo-section">
+        <h2>1. Box Response Line</h2>
+        <p class="description">
+          Draw a border around just the response status line:<br />
+          <code>&lt;http-console box="response-line"&gt;&lt;/http-console&gt;</code>
+        </p>
+        <http-console id="demo1" box="response-line"></http-console>
+      </div>
+
+      <div class="demo-section">
+        <h2>2. Box All Request Headers</h2>
+        <p class="description">
+          Box all request headers together with a "Request Headers" label:<br />
+          <code>&lt;http-console box="request-headers"&gt;&lt;/http-console&gt;</code>
+        </p>
+        <http-console id="demo2" box="request-headers"></http-console>
+      </div>
+
+      <div class="demo-section">
+        <h2>3. Box Response Body</h2>
+        <p class="description">
+          Box the response body to emphasize the payload:<br />
+          <code>&lt;http-console box="response-body"&gt;&lt;/http-console&gt;</code>
+        </p>
+        <http-console id="demo3" box="response-body"></http-console>
+      </div>
+
+      <div class="demo-section">
+        <h2>4. Box Specific Headers</h2>
+        <p class="description">
+          Box specific individual headers with their names as labels:<br />
+          <code
+            >&lt;http-console
+            box="request-header:Authorization,response-header:Location"&gt;&lt;/http-console&gt;</code
+          >
+        </p>
+        <http-console
+          id="demo4"
+          box="request-header:Authorization,response-header:Location"
+        ></http-console>
+      </div>
+
+      <div class="demo-section">
+        <h2>5. Box All Three Request Sections</h2>
+        <p class="description">
+          Box request line, headers, and body to show the complete request structure:<br />
+          <code
+            >&lt;http-console
+            box="request-line,request-headers,request-body"&gt;&lt;/http-console&gt;</code
+          >
+        </p>
+        <http-console id="demo5" box="request-line,request-headers,request-body"></http-console>
+      </div>
+
+      <div class="demo-section">
+        <h2>6. Box All Three Response Sections</h2>
+        <p class="description">
+          Box response line, headers, and body to show the complete response structure:<br />
+          <code
+            >&lt;http-console
+            box="response-line,response-headers,response-body"&gt;&lt;/http-console&gt;</code
+          >
+        </p>
+        <http-console id="demo6" box="response-line,response-headers,response-body"></http-console>
+      </div>
+
+      <div class="demo-section">
+        <h2>7. Combine Box and Highlight</h2>
+        <p class="description">
+          You can use both <code>box</code> and <code>highlight</code> together:<br />
+          <code
+            >&lt;http-console box="response-line,response-body"
+            highlight="response-header:Content-Type"&gt;&lt;/http-console&gt;</code
+          >
+        </p>
+        <http-console
+          id="demo7"
+          box="response-line,response-body"
+          highlight="response-header:Content-Type"
+        ></http-console>
+      </div>
+
+      <div class="demo-section">
+        <h2>8. Mixed: Box Sections and Individual Headers</h2>
+        <p class="description">
+          Box the response line and specific headers:<br />
+          <code
+            >&lt;http-console
+            box="response-line,response-header:Content-Type,response-header:Location"&gt;&lt;/http-console&gt;</code
+          >
+        </p>
+        <http-console
+          id="demo8"
+          box="response-line,response-header:Content-Type,response-header:Location"
+        ></http-console>
+      </div>
+    </div>
+
+    <script type="module">
+      import '../src/http-console.js';
+
+      // Sample data for demos
+      const sampleData = {
+        request: {
+          method: 'POST',
+          url: '/api/users',
+          httpVersion: 'HTTP/1.1',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+            Accept: 'application/json',
+            'User-Agent': 'MyApp/1.0',
+          },
+          body: JSON.stringify(
+            {
+              name: 'Jane Smith',
+              email: 'jane@example.com',
+              role: 'developer',
+            },
+            null,
+            2
+          ),
+        },
+        response: {
+          status: 201,
+          statusText: 'Created',
+          httpVersion: 'HTTP/1.1',
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            Location: '/api/users/456',
+            'Cache-Control': 'no-cache',
+            ETag: '"33a64df551425fcc55e4d42a148795d9f25f89d4"',
+          },
+          body: JSON.stringify(
+            {
+              id: 456,
+              name: 'Jane Smith',
+              email: 'jane@example.com',
+              role: 'developer',
+              created: '2025-11-27T14:30:00Z',
+            },
+            null,
+            2
+          ),
+        },
+      };
+
+      // Apply same data to all demos
+      for (let i = 1; i <= 8; i++) {
+        document.getElementById(`demo${i}`).data = sampleData;
+      }
+    </script>
+  </body>
+</html>
