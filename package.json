@@ -1,5 +1,5 @@
 {
-  "name": "http-console-component",
+  "name": ""@profpowell/http-component",
   "version": "0.1.0",
   "description": "Dependency-free vanilla web components for displaying HTTP request/response data",
   "type": "module",
