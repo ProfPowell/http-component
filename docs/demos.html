@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demos - HTTP Component</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="container">
+      <a href="index.html" class="nav-brand">HTTP Component</a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="demos.html" class="active">Demos</a></li>
+        <li><a href="api.html">API</a></li>
+        <li><a href="https://github.com/ProfPowell/http-component" target="_blank">GitHub</a></li>
+        <li><button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section>
+    <div class="container">
+      <h2>Interactive Demos</h2>
+
+      <!-- Basic Transaction -->
+      <div class="demo-section" id="transaction">
+        <h3>HTTP Transaction (Request + Response)</h3>
+        <p>A complete HTTP exchange showing both request and response in wire format.</p>
+        <http-transaction id="demo-transaction"></http-transaction>
+      </div>
+
+      <!-- Request Only -->
+      <div class="demo-section" id="request-only">
+        <h3>Request Only</h3>
+        <p>Display just the request portion with method coloring and header highlighting.</p>
+        <http-request id="demo-request"></http-request>
+      </div>
+
+      <!-- Response Only -->
+      <div class="demo-section" id="response-only">
+        <h3>Response Only</h3>
+        <p>Display just the response with status code coloring and JSON body highlighting.</p>
+        <http-response id="demo-response"></http-response>
+      </div>
+
+      <!-- JSON Highlighting -->
+      <div class="demo-section" id="json">
+        <h3>JSON Body Highlighting</h3>
+        <p>JSON responses are automatically parsed and syntax highlighted.</p>
+        <http-transaction id="demo-json"></http-transaction>
+      </div>
+
+      <!-- HTML Response -->
+      <div class="demo-section" id="html">
+        <h3>HTML Response</h3>
+        <p>HTML content with tag, attribute, and value highlighting.</p>
+        <http-transaction id="demo-html"></http-transaction>
+      </div>
+
+      <!-- CSS Response -->
+      <div class="demo-section" id="css">
+        <h3>CSS Response</h3>
+        <p>CSS with selector, property, and value highlighting.</p>
+        <http-transaction id="demo-css"></http-transaction>
+      </div>
+
+      <!-- JavaScript Response -->
+      <div class="demo-section" id="javascript">
+        <h3>JavaScript Response</h3>
+        <p>JavaScript with keyword, string, and comment highlighting.</p>
+        <http-transaction id="demo-js"></http-transaction>
+      </div>
+
+      <!-- Error Response -->
+      <div class="demo-section" id="error">
+        <h3>Error Response (404)</h3>
+        <p>Error status codes are highlighted in red/orange colors.</p>
+        <http-transaction id="demo-error"></http-transaction>
+      </div>
+
+      <!-- Waterfall View -->
+      <div class="demo-section" id="waterfall">
+        <h3>Waterfall View</h3>
+        <p>Multiple requests visualized with timing. Toggle between List, Duration, and Waterfall views.</p>
+        <http-waterfall id="demo-waterfall" view="waterfall"></http-waterfall>
+      </div>
+
+      <!-- Live Capture -->
+      <div class="demo-section" id="live-capture">
+        <h3>Live HTTP Capture</h3>
+        <p>Capture real HTTP requests made by the page. Click the buttons to make test API calls.</p>
+
+        <div class="info-box">
+          The viewer below captures all fetch() and XMLHttpRequest calls. Try the buttons to see requests appear in real-time!
+        </div>
+
+        <div class="controls">
+          <h4>Test API Calls</h4>
+          <div class="button-group">
+            <button onclick="makeGetRequest()" class="primary">GET Request</button>
+            <button onclick="makePostRequest()" class="primary">POST Request</button>
+            <button onclick="makeMultipleRequests()" class="primary">Multiple Requests</button>
+            <button onclick="make404Request()" class="primary">404 Error</button>
+          </div>
+        </div>
+
+        <http-waterfall id="demo-capture" capture="true" max-entries="20"></http-waterfall>
+      </div>
+
+      <!-- Request Builder -->
+      <div class="demo-section" id="explorer">
+        <h3>Request Builder (Explorer)</h3>
+        <p>Build and send custom HTTP requests interactively. The explorer is built into http-waterfall.</p>
+        <http-waterfall id="demo-explorer" explorer></http-waterfall>
+      </div>
+
+      <!-- Highlight Feature -->
+      <div class="demo-section" id="highlighting">
+        <h3>Highlighting Sections</h3>
+        <p>Use the <code>highlight</code> attribute to emphasize specific parts of the request/response.</p>
+        <http-transaction id="demo-highlight" highlight="request-line,response-body"></http-transaction>
+      </div>
+
+      <!-- Box Feature -->
+      <div class="demo-section" id="boxing">
+        <h3>Bordered Sections</h3>
+        <p>Use the <code>box</code> attribute to add labeled borders around sections.</p>
+        <http-transaction id="demo-box" box="request-headers,response-body"></http-transaction>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <p>HTTP Component is open source. <a href="https://github.com/ProfPowell/http-component">View on GitHub</a></p>
+    </div>
+  </footer>
+
+  <script type="module" src="../src/http-transaction.js"></script>
+  <script type="module" src="../src/http-waterfall.js"></script>
+  <script type="module">
+    await customElements.whenDefined('http-transaction');
+    await customElements.whenDefined('http-waterfall');
+
+    const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    // Set theme on all components
+    function updateComponentThemes() {
+      const t = document.documentElement.getAttribute('data-theme') || 'light';
+      document.querySelectorAll('http-transaction, http-request, http-response, http-waterfall').forEach(el => {
+        el.setAttribute('theme', t);
+      });
+    }
+
+    // Basic Transaction
+    document.getElementById('demo-transaction').data = {
+      request: {
+        method: 'GET',
+        url: '/api/users/123',
+        httpVersion: 'HTTP/1.1',
+        headers: {
+          'Host': 'api.example.com',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIs...'
+        }
+      },
+      response: {
+        status: 200,
+        statusText: 'OK',
+        httpVersion: 'HTTP/1.1',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': '94'
+        },
+        body: JSON.stringify({ id: 123, name: 'John Doe', email: 'john@example.com' }, null, 2)
+      }
+    };
+
+    // Request Only
+    document.getElementById('demo-request').data = {
+      method: 'POST',
+      url: '/api/users',
+      httpVersion: 'HTTP/1.1',
+      headers: {
+        'Host': 'api.example.com',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer token...'
+      },
+      body: JSON.stringify({ name: 'Jane Smith', email: 'jane@example.com' }, null, 2)
+    };
+
+    // Response Only
+    document.getElementById('demo-response').data = {
+      status: 201,
+      statusText: 'Created',
+      httpVersion: 'HTTP/1.1',
+      headers: {
+        'Content-Type': 'application/json',
+        'Location': '/api/users/124'
+      },
+      body: JSON.stringify({ id: 124, name: 'Jane Smith', createdAt: '2025-01-17T10:00:00Z' }, null, 2)
+    };
+
+    // JSON Demo
+    document.getElementById('demo-json').data = {
+      request: {
+        method: 'GET',
+        url: '/api/products',
+        headers: { 'Accept': 'application/json' }
+      },
+      response: {
+        status: 200,
+        statusText: 'OK',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          products: [
+            { id: 1, name: 'Widget', price: 29.99, inStock: true },
+            { id: 2, name: 'Gadget', price: 49.99, inStock: false }
+          ],
+          total: 2,
+          page: 1
+        }, null, 2)
+      }
+    };
+
+    // HTML Demo
+    document.getElementById('demo-html').data = {
+      request: {
+        method: 'GET',
+        url: '/index.html',
+        headers: { 'Accept': 'text/html' }
+      },
+      response: {
+        status: 200,
+        statusText: 'OK',
+        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+        body: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Welcome</title>
+</head>
+<body>
+  <h1>Hello, World!</h1>
+  <p class="intro">Welcome to our website.</p>
+</body>
+</html>`
+      }
+    };
+
+    // CSS Demo
+    document.getElementById('demo-css').data = {
+      request: {
+        method: 'GET',
+        url: '/styles/main.css',
+        headers: { 'Accept': 'text/css' }
+      },
+      response: {
+        status: 200,
+        statusText: 'OK',
+        headers: { 'Content-Type': 'text/css' },
+        body: `/* Main stylesheet */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+#header {
+  background-color: #2563eb;
+  color: white;
+}
+
+.btn-primary {
+  background: #059669;
+  border-radius: 4px;
+}`
+      }
+    };
+
+    // JavaScript Demo
+    document.getElementById('demo-js').data = {
+      request: {
+        method: 'GET',
+        url: '/js/app.js',
+        headers: { 'Accept': '*/*' }
+      },
+      response: {
+        status: 200,
+        statusText: 'OK',
+        headers: { 'Content-Type': 'application/javascript' },
+        body: `// Application initialization
+const API_URL = 'https://api.example.com';
+
+async function fetchUserData(userId) {
+  try {
+    const response = await fetch(\`\${API_URL}/users/\${userId}\`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error:', error);
+    return null;
+  }
+}`
+      }
+    };
+
+    // Error Demo
+    document.getElementById('demo-error').data = {
+      request: {
+        method: 'GET',
+        url: '/api/users/999',
+        headers: { 'Accept': 'application/json' }
+      },
+      response: {
+        status: 404,
+        statusText: 'Not Found',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'User not found', code: 'USER_NOT_FOUND' }, null, 2)
+      }
+    };
+
+    // Waterfall Demo
+    document.getElementById('demo-waterfall').exchanges = [
+      {
+        request: { method: 'GET', url: '/api/user/profile', headers: {} },
+        response: { status: 200, statusText: 'OK', headers: { 'Content-Type': 'application/json' }, body: '{}' },
+        timing: { startTime: 0, endTime: 87, duration: 87 }
+      },
+      {
+        request: { method: 'GET', url: '/api/user/posts', headers: {} },
+        response: { status: 200, statusText: 'OK', headers: { 'Content-Type': 'application/json' }, body: '[]' },
+        timing: { startTime: 20, endTime: 176, duration: 156 }
+      },
+      {
+        request: { method: 'POST', url: '/api/analytics/track', headers: {} },
+        response: { status: 201, statusText: 'Created', headers: {}, body: '{}' },
+        timing: { startTime: 95, endTime: 137, duration: 42 }
+      },
+      {
+        request: { method: 'GET', url: '/api/notifications', headers: {} },
+        response: { status: 200, statusText: 'OK', headers: {}, body: '{}' },
+        timing: { startTime: 110, endTime: 198, duration: 88 }
+      },
+      {
+        request: { method: 'GET', url: '/api/settings', headers: {} },
+        response: { status: 404, statusText: 'Not Found', headers: {}, body: '{}' },
+        timing: { startTime: 180, endTime: 242, duration: 62 }
+      }
+    ];
+
+    // Highlight Demo
+    document.getElementById('demo-highlight').data = {
+      request: {
+        method: 'GET',
+        url: '/api/highlighted',
+        headers: { 'Accept': 'application/json' }
+      },
+      response: {
+        status: 200,
+        statusText: 'OK',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: 'This body is highlighted!' }, null, 2)
+      }
+    };
+
+    // Box Demo
+    document.getElementById('demo-box').data = {
+      request: {
+        method: 'POST',
+        url: '/api/boxed',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer token...'
+        },
+        body: JSON.stringify({ data: 'test' })
+      },
+      response: {
+        status: 200,
+        statusText: 'OK',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ success: true, id: 42 }, null, 2)
+      }
+    };
+
+    updateComponentThemes();
+
+    // Override toggleTheme to also update components
+    window.toggleTheme = function() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      updateComponentThemes();
+    };
+
+    // Initialize theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+    updateComponentThemes();
+  </script>
+
+  <script>
+    // Live capture test functions
+    async function makeGetRequest() {
+      try {
+        await fetch('https://jsonplaceholder.typicode.com/posts/1');
+      } catch (e) {
+        console.log('Request error:', e.message);
+      }
+    }
+
+    async function makePostRequest() {
+      try {
+        await fetch('https://jsonplaceholder.typicode.com/posts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: 'Test', body: 'Demo post', userId: 1 })
+        });
+      } catch (e) {
+        console.log('Request error:', e.message);
+      }
+    }
+
+    async function makeMultipleRequests() {
+      await Promise.all([
+        fetch('https://jsonplaceholder.typicode.com/posts/1'),
+        fetch('https://jsonplaceholder.typicode.com/posts/2'),
+        fetch('https://jsonplaceholder.typicode.com/users/1')
+      ]);
+    }
+
+    async function make404Request() {
+      try {
+        await fetch('https://jsonplaceholder.typicode.com/posts/999999');
+      } catch (e) {
+        console.log('Request error:', e.message);
+      }
+    }
+  </script>
+</body>
+</html>

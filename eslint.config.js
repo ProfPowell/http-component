@@ -18,13 +18,17 @@ export default [
         fetch: 'readonly',
         XMLHttpRequest: 'readonly',
         performance: 'readonly',
+        URL: 'readonly',
+        CustomEvent: 'readonly',
         console: 'readonly',
         setTimeout: 'readonly',
         confirm: 'readonly',
         alert: 'readonly',
-        // Node test globals
+        // Playwright test globals
         describe: 'readonly',
         it: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
       },
     },
     rules: {

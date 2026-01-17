@@ -1,5 +1,5 @@
 import { HTTPInterceptor } from './http-interceptor.js';
-import './http-console.js';
+import './http-transaction.js';
 
 /**
  * Inline CSS styles for http-waterfall component
@@ -89,6 +89,42 @@ const HTTP_WATERFALL_STYLES = `/** HTTP Waterfall Component Styles */
 .timing-bar.status-server-error { background: var(--timing-server-error-bg); border: 1px solid var(--timing-server-error-border); }
 .duration-label { font-size: 11px; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: clip; }
 @media (max-width: 900px) { .exchange-summary { grid-template-columns: 60px 1fr 100px 60px 60px 30px; gap: 8px; font-size: 13px; } .duration-row, .duration-header { grid-template-columns: 200px 1fr; } .waterfall-row, .timeline-header { grid-template-columns: 200px 1fr; } }
+
+/* Explorer/Request Builder styles */
+.explorer-panel { background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); padding: 16px; }
+.explorer-toggle { display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-primary); font-weight: 500; font-size: 13px; padding: 8px 12px; background: var(--button-bg); border: 1px solid var(--button-border); border-radius: 4px; transition: all 0.2s; }
+.explorer-toggle:hover { background: var(--button-hover-bg); border-color: var(--button-hover-border); }
+.explorer-toggle.active { background: var(--button-primary-bg); color: white; border-color: var(--button-primary-border); }
+.explorer-content { margin-top: 16px; display: none; }
+.explorer-content.visible { display: block; }
+.request-builder { display: flex; flex-direction: column; gap: 16px; }
+.request-line-builder { display: flex; gap: 12px; align-items: center; }
+.method-select { padding: 10px 12px; border: 1px solid var(--button-border); border-radius: 4px; background: var(--button-bg); color: var(--text-primary); font-size: 14px; font-weight: 600; cursor: pointer; min-width: 100px; }
+.method-select:focus { outline: none; border-color: var(--button-primary-bg); }
+.url-input { flex: 1; padding: 10px 12px; border: 1px solid var(--button-border); border-radius: 4px; background: var(--button-bg); color: var(--text-primary); font-size: 14px; font-family: 'Courier New', monospace; }
+.url-input:focus { outline: none; border-color: var(--button-primary-bg); }
+.send-button { padding: 10px 24px; background: var(--button-primary-bg); color: white; border: none; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.send-button:hover { background: var(--button-primary-hover); }
+.send-button:disabled { opacity: 0.5; cursor: not-allowed; }
+.headers-section { display: flex; flex-direction: column; gap: 8px; }
+.section-label { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+.headers-list { display: flex; flex-direction: column; gap: 8px; }
+.header-row { display: flex; gap: 8px; align-items: center; }
+.header-input { padding: 8px 10px; border: 1px solid var(--button-border); border-radius: 4px; background: var(--button-bg); color: var(--text-primary); font-size: 13px; font-family: 'Courier New', monospace; }
+.header-input:focus { outline: none; border-color: var(--button-primary-bg); }
+.header-input.name { flex: 1; min-width: 150px; }
+.header-input.value { flex: 2; min-width: 200px; }
+.remove-header-btn { padding: 6px 10px; background: var(--status-server-error-bg); color: var(--status-server-error-text); border: none; border-radius: 4px; font-size: 12px; cursor: pointer; transition: opacity 0.2s; }
+.remove-header-btn:hover { opacity: 0.9; }
+.add-header-btn { padding: 8px 16px; background: var(--bg-primary); color: var(--text-primary); border: 2px dashed var(--button-border); border-radius: 4px; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+.add-header-btn:hover { border-color: var(--button-primary-bg); color: var(--button-primary-bg); }
+.body-section { display: flex; flex-direction: column; gap: 8px; }
+.body-textarea { width: 100%; min-height: 100px; padding: 12px; border: 1px solid var(--button-border); border-radius: 4px; background: var(--button-bg); color: var(--text-primary); font-size: 13px; font-family: 'Courier New', monospace; line-height: 1.5; resize: vertical; box-sizing: border-box; }
+.body-textarea:focus { outline: none; border-color: var(--button-primary-bg); }
+.explorer-status { margin-top: 12px; padding: 12px 16px; border-radius: 4px; font-size: 14px; }
+.explorer-status.loading { background: var(--status-redirect-bg); color: var(--status-redirect-text); }
+.explorer-status.success { background: var(--status-success-bg); color: var(--status-success-text); }
+.explorer-status.error { background: var(--status-server-error-bg); color: var(--status-server-error-text); }
 `;
 
 /**
@@ -141,6 +177,12 @@ class HTTPWaterfallElement extends HTMLElement {
     this._isPaused = false;
     this._interceptor = null;
 
+    // Explorer (request builder) state
+    this._explorerOpen = false;
+    this._explorerHeaders = [{ name: '', value: '' }];
+    this._explorerLoading = false;
+    this._explorerStatus = null;
+
     // Handle property shadowing like http-console
     if (this.hasOwnProperty('exchanges')) {
       const existingData = this.exchanges;
@@ -150,7 +192,7 @@ class HTTPWaterfallElement extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['view', 'requests', 'capture', 'filter', 'max-entries', 'theme'];
+    return ['view', 'requests', 'capture', 'filter', 'max-entries', 'theme', 'explorer'];
   }
 
   /**
@@ -163,21 +205,27 @@ class HTTPWaterfallElement extends HTMLElement {
       this._view = this.getSmartDefaultView();
     }
 
+    // Check if explorer should be open initially
+    this._explorerOpen = this.hasAttribute('explorer');
+
     // Create initial DOM structure
     this.shadowRoot.innerHTML = `
       <style>${HTTP_WATERFALL_STYLES}</style>
       <div class="http-waterfall">
         <div class="toolbar-container"></div>
+        <div class="explorer-container"></div>
         <div class="view-container"></div>
       </div>
     `;
 
     // Cache container references
     this._toolbarContainer = this.shadowRoot.querySelector('.toolbar-container');
+    this._explorerContainer = this.shadowRoot.querySelector('.explorer-container');
     this._viewContainer = this.shadowRoot.querySelector('.view-container');
 
     // Initial render
     this.renderToolbar();
+    this.renderExplorer();
     this.renderView();
     this.updateTheme();
 
@@ -219,6 +267,10 @@ class HTTPWaterfallElement extends HTMLElement {
       } else if (name === 'theme') {
         this.updateTheme();
         return; // Don't re-render for theme changes
+      } else if (name === 'explorer') {
+        this._explorerOpen = newValue !== null;
+        this.renderExplorer();
+        return; // Don't re-render everything for explorer toggle
       }
       this.render();
     }
@@ -244,13 +296,14 @@ class HTTPWaterfallElement extends HTMLElement {
   }
 
   /**
-   * Update theme on child http-console elements
+   * Update theme on child http-transaction/http-console elements
    */
   updateChildThemes() {
     const theme = this.getAttribute('theme');
-    const consoles = this.shadowRoot.querySelectorAll('http-console');
-    consoles.forEach(console => {
-      console.setAttribute('theme', theme);
+    // Support both http-transaction (new) and http-console (backwards compat)
+    const transactions = this.shadowRoot.querySelectorAll('http-transaction, http-console');
+    transactions.forEach(el => {
+      el.setAttribute('theme', theme);
     });
   }
 
@@ -526,18 +579,18 @@ class HTTPWaterfallElement extends HTMLElement {
     // Create a unique ID for this detail element
     const detailId = `detail-${Math.random().toString(36).substr(2, 9)}`;
 
-    // Return placeholder that will be populated with http-console element
+    // Return placeholder that will be populated with http-transaction element
     setTimeout(() => {
       const detailElement = this.shadowRoot.getElementById(detailId);
       if (detailElement) {
-        const consoleElement = document.createElement('http-console');
-        consoleElement.data = { request, response };
-        // Apply theme to child console
+        const transactionElement = document.createElement('http-transaction');
+        transactionElement.data = { request, response };
+        // Apply theme to child transaction
         const theme = this.getAttribute('theme');
         if (theme) {
-          consoleElement.setAttribute('theme', theme);
+          transactionElement.setAttribute('theme', theme);
         }
-        detailElement.appendChild(consoleElement);
+        detailElement.appendChild(transactionElement);
       }
     }, 0);
 
@@ -792,7 +845,341 @@ class HTTPWaterfallElement extends HTMLElement {
       });
     });
   }
+
+  // ===== Explorer (Request Builder) Methods =====
+
+  /**
+   * Toggle the explorer panel open/closed
+   */
+  toggleExplorer() {
+    this._explorerOpen = !this._explorerOpen;
+    this.renderExplorer();
+  }
+
+  /**
+   * Render the explorer/request builder panel
+   */
+  renderExplorer() {
+    if (!this._explorerContainer) return;
+
+    this._explorerContainer.innerHTML = `
+      <div class="explorer-panel">
+        <button class="explorer-toggle ${this._explorerOpen ? 'active' : ''}">
+          ${this._explorerOpen ? '\u25BC' : '\u25B6'} Request Builder
+        </button>
+        <div class="explorer-content ${this._explorerOpen ? 'visible' : ''}">
+          ${this.renderExplorerContent()}
+        </div>
+      </div>
+    `;
+
+    this.attachExplorerEventListeners();
+  }
+
+  /**
+   * Render the explorer form content
+   * @returns {string} HTML content
+   */
+  renderExplorerContent() {
+    const statusHtml = this._explorerStatus
+      ? `<div class="explorer-status ${this._explorerStatus.type}">${this._explorerStatus.message}</div>`
+      : '';
+
+    return `
+      <div class="request-builder">
+        <div class="request-line-builder">
+          <select class="method-select" id="explorer-method">
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="PATCH">PATCH</option>
+            <option value="DELETE">DELETE</option>
+            <option value="HEAD">HEAD</option>
+            <option value="OPTIONS">OPTIONS</option>
+          </select>
+          <input type="text" class="url-input" id="explorer-url" placeholder="https://api.example.com/endpoint" />
+          <button class="send-button" id="explorer-send" ${this._explorerLoading ? 'disabled' : ''}>
+            ${this._explorerLoading ? 'Sending...' : 'Send'}
+          </button>
+        </div>
+
+        <div class="headers-section">
+          <div class="section-label">Headers</div>
+          <div class="headers-list" id="explorer-headers">
+            ${this._explorerHeaders.map((h, i) => this.renderHeaderRow(h, i)).join('')}
+          </div>
+          <button class="add-header-btn" id="explorer-add-header">+ Add Header</button>
+        </div>
+
+        <div class="body-section">
+          <div class="section-label">Request Body</div>
+          <textarea class="body-textarea" id="explorer-body" placeholder="Enter request body (JSON, XML, etc.)"></textarea>
+        </div>
+
+        ${statusHtml}
+      </div>
+    `;
+  }
+
+  /**
+   * Render a single header row
+   * @param {Object} header - Header object with name and value
+   * @param {number} index - Row index
+   * @returns {string} HTML content
+   */
+  renderHeaderRow(header, index) {
+    return `
+      <div class="header-row" data-index="${index}">
+        <input type="text" class="header-input name" placeholder="Header name" value="${this.escapeHtml(header.name)}" data-index="${index}" />
+        <input type="text" class="header-input value" placeholder="Header value" value="${this.escapeHtml(header.value)}" data-index="${index}" />
+        <button class="remove-header-btn" data-index="${index}">\u00D7</button>
+      </div>
+    `;
+  }
+
+  /**
+   * Attach event listeners for the explorer panel
+   */
+  attachExplorerEventListeners() {
+    const toggleBtn = this.shadowRoot.querySelector('.explorer-toggle');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => this.toggleExplorer());
+    }
+
+    const sendBtn = this.shadowRoot.querySelector('#explorer-send');
+    if (sendBtn) {
+      sendBtn.addEventListener('click', () => this.sendExplorerRequest());
+    }
+
+    const addHeaderBtn = this.shadowRoot.querySelector('#explorer-add-header');
+    if (addHeaderBtn) {
+      addHeaderBtn.addEventListener('click', () => this.addExplorerHeader());
+    }
+
+    const headersList = this.shadowRoot.querySelector('#explorer-headers');
+    if (headersList) {
+      headersList.addEventListener('input', e => {
+        if (e.target.classList.contains('header-input')) {
+          this.updateExplorerHeader(e.target);
+        }
+      });
+      headersList.addEventListener('click', e => {
+        if (e.target.classList.contains('remove-header-btn')) {
+          this.removeExplorerHeader(parseInt(e.target.dataset.index, 10));
+        }
+      });
+    }
+  }
+
+  /**
+   * Add a new header row to the explorer
+   */
+  addExplorerHeader() {
+    this._explorerHeaders.push({ name: '', value: '' });
+    this.renderExplorer();
+  }
+
+  /**
+   * Update a header value in the explorer
+   * @param {HTMLInputElement} input - Input element
+   */
+  updateExplorerHeader(input) {
+    const index = parseInt(input.dataset.index, 10);
+    const field = input.classList.contains('name') ? 'name' : 'value';
+    this._explorerHeaders[index][field] = input.value;
+  }
+
+  /**
+   * Remove a header row from the explorer
+   * @param {number} index - Header index
+   */
+  removeExplorerHeader(index) {
+    this._explorerHeaders.splice(index, 1);
+    if (this._explorerHeaders.length === 0) {
+      this._explorerHeaders.push({ name: '', value: '' });
+    }
+    this.renderExplorer();
+  }
+
+  /**
+   * Send the request built in the explorer
+   */
+  async sendExplorerRequest() {
+    const methodSelect = this.shadowRoot.querySelector('#explorer-method');
+    const urlInput = this.shadowRoot.querySelector('#explorer-url');
+    const bodyTextarea = this.shadowRoot.querySelector('#explorer-body');
+
+    const method = methodSelect.value;
+    const url = urlInput.value.trim();
+    const bodyText = bodyTextarea.value.trim();
+
+    // Validation
+    if (!url) {
+      this._explorerStatus = { type: 'error', message: 'Please enter a URL' };
+      this.renderExplorer();
+      return;
+    }
+
+    try {
+      new URL(url);
+    } catch {
+      this._explorerStatus = { type: 'error', message: 'Invalid URL format' };
+      this.renderExplorer();
+      return;
+    }
+
+    // Build headers object
+    const headers = {};
+    this._explorerHeaders.forEach(header => {
+      if (header.name && header.value) {
+        headers[header.name] = header.value;
+      }
+    });
+
+    // Set loading state
+    this._explorerLoading = true;
+    this._explorerStatus = { type: 'loading', message: 'Sending request...' };
+    this.renderExplorer();
+
+    const startTime = performance.now();
+
+    try {
+      // Build fetch options
+      const options = { method, headers };
+
+      // Add body for methods that support it
+      if (['POST', 'PUT', 'PATCH'].includes(method) && bodyText) {
+        options.body = bodyText;
+      }
+
+      // Dispatch event for request sent
+      this.dispatchEvent(
+        new CustomEvent('request-sent', {
+          detail: { method, url, headers, body: bodyText },
+        })
+      );
+
+      // Send request
+      const response = await fetch(url, options);
+      const endTime = performance.now();
+      const duration = Math.round(endTime - startTime);
+
+      // Extract response data
+      const responseHeaders = {};
+      response.headers.forEach((value, key) => {
+        responseHeaders[key] = value;
+      });
+
+      let responseBody = null;
+      const contentType = response.headers.get('content-type') || '';
+
+      try {
+        if (contentType.includes('application/json')) {
+          const json = await response.json();
+          responseBody = JSON.stringify(json, null, 2);
+        } else {
+          responseBody = await response.text();
+        }
+      } catch {
+        responseBody = '[Could not read response body]';
+      }
+
+      // Create exchange and add to list
+      const exchange = {
+        request: {
+          method,
+          url,
+          httpVersion: 'HTTP/1.1',
+          headers,
+          body: bodyText || null,
+        },
+        response: {
+          status: response.status,
+          statusText: response.statusText,
+          httpVersion: 'HTTP/1.1',
+          headers: responseHeaders,
+          body: responseBody,
+        },
+        timing: {
+          startTime,
+          endTime,
+          duration,
+        },
+      };
+
+      // Add to exchanges
+      this._exchanges.unshift(exchange);
+      if (this._exchanges.length > this._maxEntries) {
+        this._exchanges = this._exchanges.slice(0, this._maxEntries);
+      }
+
+      this._explorerLoading = false;
+      this._explorerStatus = {
+        type: 'success',
+        message: `Request completed in ${duration}ms - ${response.status} ${response.statusText}`,
+      };
+
+      // Dispatch event for response received
+      this.dispatchEvent(
+        new CustomEvent('response-received', {
+          detail: exchange,
+        })
+      );
+
+      this.renderExplorer();
+      this.renderView();
+      this.updateRequestCount();
+    } catch (error) {
+      const endTime = performance.now();
+      const duration = Math.round(endTime - startTime);
+
+      this._explorerLoading = false;
+      this._explorerStatus = {
+        type: 'error',
+        message: `Request failed: ${error.message}`,
+      };
+
+      // Create error exchange
+      const exchange = {
+        request: {
+          method,
+          url,
+          httpVersion: 'HTTP/1.1',
+          headers,
+          body: bodyText || null,
+        },
+        response: {
+          status: 0,
+          statusText: 'Network Error',
+          httpVersion: 'HTTP/1.1',
+          headers: {},
+          body: JSON.stringify({ error: error.message }),
+        },
+        timing: {
+          startTime,
+          endTime,
+          duration,
+        },
+      };
+
+      // Add error exchange to list
+      this._exchanges.unshift(exchange);
+
+      // Dispatch error event
+      this.dispatchEvent(
+        new CustomEvent('request-error', {
+          detail: { error: error.message },
+        })
+      );
+
+      this.renderExplorer();
+      this.renderView();
+      this.updateRequestCount();
+    }
+  }
 }
 
 // Register the custom element
 customElements.define('http-waterfall', HTTPWaterfallElement);
+
+export { HTTPWaterfallElement };

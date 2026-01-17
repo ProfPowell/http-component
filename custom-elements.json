@@ -4,344 +4,71 @@
   "modules": [
     {
       "kind": "javascript-module",
-      "path": "src/http-console.js",
-      "declarations": [
-        {
-          "kind": "class",
-          "description": "HTTPConsoleElement - Web component for displaying HTTP request/response data\nDisplays data in raw HTTP wire format for educational purposes.",
-          "name": "HTTPConsoleElement",
-          "members": [
-            {
-              "kind": "method",
-              "name": "updateTheme",
-              "description": "Update theme based on attribute or system preference\nSets theme to 'dark', 'light', or auto-detects from system"
-            },
-            {
-              "kind": "field",
-              "name": "data",
-              "description": "Get current HTTP exchange data",
-              "parameters": [
-                {
-                  "description": "HTTP exchange data containing request and response",
-                  "name": "value",
-                  "type": {
-                    "text": "HTTPExchange"
-                  }
-                }
-              ],
-              "return": {
-                "type": {
-                  "text": "HTTPExchange|null"
-                }
-              }
-            },
-            {
-              "kind": "method",
-              "name": "getData",
-              "description": "Parse JSON attribute or use property data\nAttempts to parse 'request' and 'response' attributes as JSON",
-              "return": {
-                "type": {
-                  "text": "HTTPExchange"
-                }
-              },
-              "privacy": "private"
-            },
-            {
-              "kind": "method",
-              "name": "render",
-              "description": "Render the component's shadow DOM",
-              "privacy": "private"
-            },
-            {
-              "kind": "method",
-              "name": "renderRequest",
-              "parameters": [
-                {
-                  "name": "request",
-                  "description": "Request data to render",
-                  "type": {
-                    "text": "HTTPRequest|null"
-                  }
-                }
-              ],
-              "description": "Render HTTP request in wire format",
-              "return": {
-                "type": {
-                  "text": "string"
-                }
-              },
-              "privacy": "private"
-            },
-            {
-              "kind": "method",
-              "name": "renderResponse",
-              "parameters": [
-                {
-                  "name": "response",
-                  "description": "Response data to render",
-                  "type": {
-                    "text": "HTTPResponse|null"
-                  }
-                }
-              ],
-              "description": "Render HTTP response in wire format",
-              "return": {
-                "type": {
-                  "text": "string"
-                }
-              },
-              "privacy": "private"
-            },
-            {
-              "kind": "method",
-              "name": "getStatusColorClass",
-              "parameters": [
-                {
-                  "name": "status",
-                  "description": "HTTP status code",
-                  "type": {
-                    "text": "number"
-                  }
-                }
-              ],
-              "description": "Get CSS class name for status code color",
-              "return": {
-                "type": {
-                  "text": "string"
-                }
-              },
-              "privacy": "private"
-            },
-            {
-              "kind": "method",
-              "name": "escapeHtml",
-              "parameters": [
-                {
-                  "name": "text",
-                  "description": "Text to escape",
-                  "type": {
-                    "text": "string"
-                  }
-                }
-              ],
-              "description": "Escape HTML special characters to prevent XSS",
-              "return": {
-                "type": {
-                  "text": "string"
-                }
-              },
-              "privacy": "private"
-            },
-            {
-              "kind": "method",
-              "name": "highlightContentType",
-              "parameters": [
-                {
-                  "name": "value",
-                  "description": "Content-Type header value",
-                  "type": {
-                    "text": "string"
-                  }
-                }
-              ],
-              "description": "Highlight Content-Type header value (MIME type)",
-              "return": {
-                "type": {
-                  "text": "string"
-                }
-              },
-              "privacy": "private"
-            },
-            {
-              "kind": "method",
-              "name": "isJsonContentType",
-              "parameters": [
-                {
-                  "name": "headers",
-                  "description": "HTTP headers object",
-                  "type": {
-                    "text": "Object.<string, string>"
-                  }
-                }
-              ],
-              "description": "Check if content type indicates JSON",
-              "return": {
-                "type": {
-                  "text": "boolean"
-                }
-              },
-              "privacy": "private"
-            },
-            {
-              "kind": "method",
-              "name": "isBinaryContentType",
-              "parameters": [
-                {
-                  "name": "contentType",
-                  "description": "Content-Type header value",
-                  "type": {
-                    "text": "string"
-                  }
-                }
-              ],
-              "description": "Check if content type is binary",
-              "return": {
-                "type": {
-                  "text": "boolean"
-                }
-              },
-              "privacy": "private"
-            },
-            {
-              "kind": "method",
-              "name": "formatBody",
-              "parameters": [
-                {
-                  "name": "body",
-                  "description": "Response body content",
-                  "type": {
-                    "text": "string"
-                  }
-                },
-                {
-                  "name": "headers",
-                  "description": "HTTP headers",
-                  "type": {
-                    "text": "Object.<string, string>"
-                  }
-                }
-              ],
-              "description": "Format body with appropriate formatting based on content type\nHandles JSON, HTML, CSS, JavaScript, and binary data",
-              "return": {
-                "type": {
-                  "text": "string"
-                }
-              },
-              "privacy": "private"
-            },
-            {
-              "kind": "method",
-              "name": "formatJson",
-              "parameters": [
-                {
-                  "name": "obj",
-                  "description": "JavaScript object to format",
-                  "type": {
-                    "text": "*"
-                  }
-                },
-                {
-                  "name": "indent",
-                  "default": "0",
-                  "description": "Current indentation level",
-                  "optional": true,
-                  "type": {
-                    "text": "number"
-                  }
-                }
-              ],
-              "description": "Format JSON with syntax highlighting\nRecursively formats JSON with proper indentation and color coding",
-              "return": {
-                "type": {
-                  "text": "string"
-                }
-              },
-              "privacy": "private"
-            },
-            {
-              "kind": "method",
-              "name": "highlightHtml",
-              "parameters": [
-                {
-                  "name": "html",
-                  "description": "HTML-escaped HTML code to highlight",
-                  "type": {
-                    "text": "string"
-                  }
-                }
-              ],
-              "description": "Highlight HTML syntax with color coding for tags, attributes, and comments",
-              "return": {
-                "type": {
-                  "text": "string"
-                }
-              },
-              "privacy": "private"
-            },
-            {
-              "kind": "method",
-              "name": "highlightCss",
-              "parameters": [
-                {
-                  "name": "css",
-                  "description": "HTML-escaped CSS code to highlight",
-                  "type": {
-                    "text": "string"
-                  }
-                }
-              ],
-              "description": "Highlight CSS syntax with color coding for selectors, properties, and values",
-              "return": {
-                "type": {
-                  "text": "string"
-                }
-              },
-              "privacy": "private"
-            },
-            {
-              "kind": "method",
-              "name": "highlightJavaScript",
-              "parameters": [
-                {
-                  "name": "js",
-                  "description": "HTML-escaped JavaScript code to highlight",
-                  "type": {
-                    "text": "string"
-                  }
-                }
-              ],
-              "description": "Highlight JavaScript syntax with color coding for keywords, strings, and comments",
-              "return": {
-                "type": {
-                  "text": "string"
-                }
-              },
-              "privacy": "private"
-            },
-            {
-              "kind": "field",
-              "name": "_data",
-              "type": {
-                "text": "null"
-              },
-              "default": "null"
-            }
-          ],
-          "attributes": [
-            {
-              "name": "request"
-            },
-            {
-              "name": "response"
-            },
-            {
-              "name": "theme"
-            }
-          ],
-          "superclass": {
-            "name": "HTMLElement"
-          },
-          "tagName": "http-console",
-          "customElement": true
-        }
-      ],
+      "path": "src/http-component.js",
+      "declarations": [],
       "exports": [
         {
-          "kind": "custom-element-definition",
-          "name": "http-console",
+          "kind": "js",
+          "name": "HTTPMessageElement",
           "declaration": {
-            "name": "HTTPConsoleElement",
-            "module": "src/http-console.js"
+            "name": "HTTPMessageElement",
+            "module": "./http-message.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "HTTP_MESSAGE_STYLES",
+          "declaration": {
+            "name": "HTTP_MESSAGE_STYLES",
+            "module": "./http-message.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "HTTPRequestElement",
+          "declaration": {
+            "name": "HTTPRequestElement",
+            "module": "./http-request.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "HTTPResponseElement",
+          "declaration": {
+            "name": "HTTPResponseElement",
+            "module": "./http-response.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "HTTPTransactionElement",
+          "declaration": {
+            "name": "HTTPTransactionElement",
+            "module": "./http-transaction.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "HTTPWaterfallElement",
+          "declaration": {
+            "name": "HTTPWaterfallElement",
+            "module": "./http-waterfall.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "HTTPInterceptor",
+          "declaration": {
+            "name": "HTTPInterceptor",
+            "module": "./http-interceptor.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "httpInterceptor",
+          "declaration": {
+            "name": "httpInterceptor",
+            "module": "./http-interceptor.js"
           }
         }
       ]
@@ -484,7 +211,7 @@
                   "name": "text"
                 },
                 {
-                  "name": "contentType"
+                  "name": "_contentType"
                 }
               ],
               "description": "Truncate large bodies"
@@ -552,7 +279,7 @@
           "type": {
             "text": "object"
           },
-          "default": "{ method: init.method || 'GET', url: url, httpVersion: 'HTTP/1.1', headers: interceptor.extractHeaders(init.headers), body: init.body || null }"
+          "default": "{ method: init.method || 'GET', url: url, httpVersion: 'HTTP/1.1', headers: interceptor.extractHeaders(init.headers), body: init.body || null, }"
         },
         {
           "kind": "variable",
@@ -585,6 +312,1335 @@
     },
     {
       "kind": "javascript-module",
+      "path": "src/http-message.js",
+      "declarations": [
+        {
+          "kind": "variable",
+          "name": "HTTP_MESSAGE_STYLES",
+          "default": "` :host { display: block; font-family: 'Courier New', Courier, monospace; font-size: 14px; line-height: 1.5; /* Light mode colors (default) */ --bg-primary: #f5f5f5; --bg-secondary: white; --border-color: #ddd; --text-primary: #1f2937; --text-secondary: #64748b; --text-empty: #9ca3af; /* Syntax highlighting */ --header-name: #0066cc; --header-value: #334155; --mime-type-bg: #f3e8ff; --mime-type-text: #7c3aed; /* JSON colors */ --json-key: #0066cc; --json-string: #22863a; --json-number: #005cc5; --json-boolean: #6f42c1; --json-null: #6a737d; --json-error-bg: #ffeef0; --json-error-text: #d73a49; /* HTML colors */ --html-tag: #2563eb; --html-attr: #059669; --html-value: #7c3aed; --html-comment: #6a737d; /* CSS colors */ --css-selector: #2563eb; --css-property: #059669; --css-value: #7c3aed; --css-comment: #6a737d; /* JS colors */ --js-keyword: #7c3aed; --js-string: #22863a; --js-number: #005cc5; --js-comment: #6a737d; } /* Dark mode */ :host([theme=\"dark\"]) { --bg-primary: #1f2937; --bg-secondary: #111827; --border-color: #374151; --text-primary: #f3f4f6; --text-secondary: #9ca3af; --text-empty: #6b7280; /* Syntax highlighting - adjusted for dark backgrounds */ --header-name: #60a5fa; --header-value: #d1d5db; --mime-type-bg: #581c87; --mime-type-text: #e9d5ff; /* JSON colors - brighter for dark mode */ --json-key: #60a5fa; --json-string: #6ee7b7; --json-number: #93c5fd; --json-boolean: #c4b5fd; --json-null: #9ca3af; --json-error-bg: #7f1d1d; --json-error-text: #fca5a5; /* HTML colors */ --html-tag: #60a5fa; --html-attr: #34d399; --html-value: #c4b5fd; --html-comment: #9ca3af; /* CSS colors */ --css-selector: #60a5fa; --css-property: #34d399; --css-value: #c4b5fd; --css-comment: #9ca3af; /* JS colors */ --js-keyword: #c4b5fd; --js-string: #6ee7b7; --js-number: #93c5fd; --js-comment: #9ca3af; } .http-message { padding: 0; color: var(--text-primary); } .http-message pre { margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; font-size: 13px; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; color: var(--text-primary); } .empty { color: var(--text-empty); font-style: italic; padding: 8px 0; } .http-header-name { color: var(--header-name); font-weight: 600; } .mime-type { color: var(--mime-type-text); font-weight: 700; background: var(--mime-type-bg); padding: 1px 4px; border-radius: 2px; } .http-header-value { color: var(--header-value); } /* JSON Syntax Highlighting */ .json-key { color: var(--json-key); font-weight: 600; } .json-string { color: var(--json-string); } .json-number { color: var(--json-number); } .json-boolean { color: var(--json-boolean); font-weight: 600; } .json-null { color: var(--json-null); font-style: italic; } .json-error { color: var(--json-error-text); font-weight: 600; background: var(--json-error-bg); padding: 2px 6px; border-radius: 3px; margin-right: 8px; } /* HTML Syntax Highlighting */ .html-tag { color: var(--html-tag); } .html-attr { color: var(--html-attr); } .html-value { color: var(--html-value); } .html-comment { color: var(--html-comment); font-style: italic; } /* CSS Syntax Highlighting */ .css-selector { color: var(--css-selector); font-weight: 600; } .css-property { color: var(--css-property); } .css-value { color: var(--css-value); } .css-comment { color: var(--css-comment); font-style: italic; } /* JavaScript Syntax Highlighting */ .js-keyword { color: var(--js-keyword); font-weight: 600; } .js-string { color: var(--js-string); } .js-number { color: var(--js-number); } .js-comment { color: var(--js-comment); font-style: italic; } /* Highlight styles for emphasized sections */ mark.highlight { background: #fff3cd; color: inherit; padding: 2px 0; margin: -2px 0; border-radius: 2px; display: inline; box-decoration-break: clone; -webkit-box-decoration-break: clone; } :host([theme='dark']) mark.highlight { background: #664d03; border-left: 3px solid #ffc107; padding-left: 6px; } /* Box styles for bordered sections with labels */ .http-box { position: relative; border: 2px solid #2563eb; border-radius: 6px; padding: 20px 12px 12px 12px; margin: 8px 0; background: rgba(37, 99, 235, 0.02); } .http-box-label { position: absolute; top: -10px; left: 12px; background: var(--bg-secondary); padding: 2px 8px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #2563eb; border-radius: 3px; border: 2px solid #2563eb; } :host([theme='dark']) .http-box { border-color: #60a5fa; background: rgba(96, 165, 250, 0.05); } :host([theme='dark']) .http-box-label { color: #60a5fa; border-color: #60a5fa; } `",
+          "description": "Inline CSS styles for http-message component"
+        },
+        {
+          "kind": "class",
+          "description": "HTTPMessageElement - Base web component for displaying HTTP headers and body\nProvides shared rendering functionality for request and response components.",
+          "name": "HTTPMessageElement",
+          "members": [
+            {
+              "kind": "method",
+              "name": "updateTheme",
+              "description": "Update theme based on attribute or system preference"
+            },
+            {
+              "kind": "field",
+              "name": "headers",
+              "description": "Get HTTP headers",
+              "parameters": [
+                {
+                  "description": "Headers object",
+                  "name": "value",
+                  "type": {
+                    "text": "Object.<string, string>"
+                  }
+                }
+              ],
+              "return": {
+                "type": {
+                  "text": "Object.<string, string>"
+                }
+              }
+            },
+            {
+              "kind": "field",
+              "name": "body",
+              "description": "Get body content",
+              "parameters": [
+                {
+                  "description": "Body content",
+                  "name": "value",
+                  "type": {
+                    "text": "string|null"
+                  }
+                }
+              ],
+              "return": {
+                "type": {
+                  "text": "string|null"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "renderHeaders",
+              "description": "Render headers section",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "renderBody",
+              "description": "Render body section",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "escapeHtml",
+              "parameters": [
+                {
+                  "name": "text",
+                  "description": "Text to escape",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Escape HTML special characters",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "highlightContentType",
+              "parameters": [
+                {
+                  "name": "value",
+                  "description": "Content-Type value",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Highlight Content-Type header value",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "isJsonContentType",
+              "parameters": [
+                {
+                  "name": "headers",
+                  "description": "HTTP headers",
+                  "type": {
+                    "text": "Object.<string, string>"
+                  }
+                }
+              ],
+              "description": "Check if content type indicates JSON",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "isBinaryContentType",
+              "parameters": [
+                {
+                  "name": "contentType",
+                  "description": "Content-Type value",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Check if content type is binary",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "formatBody",
+              "parameters": [
+                {
+                  "name": "body",
+                  "description": "Body content",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "headers",
+                  "description": "HTTP headers",
+                  "type": {
+                    "text": "Object.<string, string>"
+                  }
+                }
+              ],
+              "description": "Format body with syntax highlighting",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "formatJson",
+              "parameters": [
+                {
+                  "name": "obj",
+                  "description": "Object to format",
+                  "type": {
+                    "text": "*"
+                  }
+                },
+                {
+                  "name": "indent",
+                  "default": "0",
+                  "description": "Indentation level",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ],
+              "description": "Format JSON with syntax highlighting",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "highlightHtml",
+              "parameters": [
+                {
+                  "name": "html",
+                  "description": "Escaped HTML code",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Highlight HTML syntax",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "highlightCss",
+              "parameters": [
+                {
+                  "name": "css",
+                  "description": "Escaped CSS code",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Highlight CSS syntax",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "highlightJavaScript",
+              "parameters": [
+                {
+                  "name": "js",
+                  "description": "Escaped JavaScript code",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Highlight JavaScript syntax",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "field",
+              "name": "_headers",
+              "type": {
+                "text": "object"
+              },
+              "default": "{}"
+            },
+            {
+              "kind": "field",
+              "name": "_body",
+              "type": {
+                "text": "null"
+              },
+              "default": "null"
+            },
+            {
+              "kind": "field",
+              "name": "_contentType",
+              "type": {
+                "text": "string"
+              },
+              "default": "''"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "theme"
+            },
+            {
+              "name": "highlight"
+            },
+            {
+              "name": "box"
+            }
+          ],
+          "superclass": {
+            "name": "HTMLElement"
+          },
+          "tagName": "http-message",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "custom-element-definition",
+          "name": "http-message",
+          "declaration": {
+            "name": "HTTPMessageElement",
+            "module": "src/http-message.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "HTTPMessageElement",
+          "declaration": {
+            "name": "HTTPMessageElement",
+            "module": "src/http-message.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "HTTP_MESSAGE_STYLES",
+          "declaration": {
+            "name": "HTTP_MESSAGE_STYLES",
+            "module": "src/http-message.js"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/http-request.js",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "HTTPRequestElement - Web component for displaying HTTP requests\nRenders request line (METHOD URL HTTP/version) followed by headers and body.",
+          "name": "HTTPRequestElement",
+          "members": [
+            {
+              "kind": "method",
+              "name": "updateTheme",
+              "description": "Update theme based on attribute or system preference"
+            },
+            {
+              "kind": "field",
+              "name": "data",
+              "description": "Get request data",
+              "parameters": [
+                {
+                  "description": "Request data",
+                  "name": "value",
+                  "type": {
+                    "text": "HTTPRequestData"
+                  }
+                }
+              ],
+              "return": {
+                "type": {
+                  "text": "HTTPRequestData|null"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getData",
+              "description": "Get data from property or attribute",
+              "return": {
+                "type": {
+                  "text": "HTTPRequestData|null"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "getHighlightedSections",
+              "description": "Parse highlight attribute",
+              "return": {
+                "type": {
+                  "text": "Object"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "isHighlighted",
+              "parameters": [
+                {
+                  "name": "section",
+                  "description": "Section name",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Check if a section should be highlighted",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "isHeaderHighlighted",
+              "parameters": [
+                {
+                  "name": "headerName",
+                  "description": "Header name",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Check if a header should be highlighted",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "getBoxedSections",
+              "description": "Parse box attribute",
+              "return": {
+                "type": {
+                  "text": "Object"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "isBoxed",
+              "parameters": [
+                {
+                  "name": "section",
+                  "description": "Section name",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Check if a section should be boxed",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "renderRequestContent",
+              "parameters": [
+                {
+                  "name": "request",
+                  "description": "Request data",
+                  "type": {
+                    "text": "HTTPRequestData"
+                  }
+                }
+              ],
+              "description": "Render request content",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "escapeHtml",
+              "parameters": [
+                {
+                  "name": "text",
+                  "description": "Text to escape",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Escape HTML special characters",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "highlightContentType",
+              "parameters": [
+                {
+                  "name": "value",
+                  "description": "Content-Type value",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Highlight Content-Type header value",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "formatBody",
+              "parameters": [
+                {
+                  "name": "body",
+                  "description": "Body content",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "headers",
+                  "description": "HTTP headers",
+                  "type": {
+                    "text": "Object.<string, string>"
+                  }
+                }
+              ],
+              "description": "Format body with syntax highlighting",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "formatJson",
+              "parameters": [
+                {
+                  "name": "obj",
+                  "description": "Object to format",
+                  "type": {
+                    "text": "*"
+                  }
+                },
+                {
+                  "name": "indent",
+                  "default": "0",
+                  "description": "Indentation level",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ],
+              "description": "Format JSON with syntax highlighting",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "highlightHtml",
+              "parameters": [
+                {
+                  "name": "html",
+                  "description": "Escaped HTML code",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Highlight HTML syntax",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "highlightCss",
+              "parameters": [
+                {
+                  "name": "css",
+                  "description": "Escaped CSS code",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Highlight CSS syntax",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "highlightJavaScript",
+              "parameters": [
+                {
+                  "name": "js",
+                  "description": "Escaped JavaScript code",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Highlight JavaScript syntax",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "field",
+              "name": "_data",
+              "type": {
+                "text": "null"
+              },
+              "default": "null"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "request"
+            },
+            {
+              "name": "theme"
+            },
+            {
+              "name": "highlight"
+            },
+            {
+              "name": "box"
+            },
+            {
+              "name": "show-header"
+            }
+          ],
+          "superclass": {
+            "name": "HTMLElement"
+          },
+          "tagName": "http-request",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "custom-element-definition",
+          "name": "http-request",
+          "declaration": {
+            "name": "HTTPRequestElement",
+            "module": "src/http-request.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "HTTPRequestElement",
+          "declaration": {
+            "name": "HTTPRequestElement",
+            "module": "src/http-request.js"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/http-response.js",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "HTTPResponseElement - Web component for displaying HTTP responses\nRenders status line (HTTP/version STATUS REASON) followed by headers and body.",
+          "name": "HTTPResponseElement",
+          "members": [
+            {
+              "kind": "method",
+              "name": "updateTheme",
+              "description": "Update theme based on attribute or system preference"
+            },
+            {
+              "kind": "field",
+              "name": "data",
+              "description": "Get response data",
+              "parameters": [
+                {
+                  "description": "Response data",
+                  "name": "value",
+                  "type": {
+                    "text": "HTTPResponseData"
+                  }
+                }
+              ],
+              "return": {
+                "type": {
+                  "text": "HTTPResponseData|null"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getData",
+              "description": "Get data from property or attribute",
+              "return": {
+                "type": {
+                  "text": "HTTPResponseData|null"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "getHighlightedSections",
+              "description": "Parse highlight attribute",
+              "return": {
+                "type": {
+                  "text": "Object"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "isHighlighted",
+              "parameters": [
+                {
+                  "name": "section",
+                  "description": "Section name",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Check if a section should be highlighted",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "isHeaderHighlighted",
+              "parameters": [
+                {
+                  "name": "headerName",
+                  "description": "Header name",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Check if a header should be highlighted",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "getBoxedSections",
+              "description": "Parse box attribute",
+              "return": {
+                "type": {
+                  "text": "Object"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "isBoxed",
+              "parameters": [
+                {
+                  "name": "section",
+                  "description": "Section name",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Check if a section should be boxed",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "getStatusColorClass",
+              "parameters": [
+                {
+                  "name": "status",
+                  "description": "HTTP status code",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ],
+              "description": "Get CSS class for status code",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "renderResponseContent",
+              "parameters": [
+                {
+                  "name": "response",
+                  "description": "Response data",
+                  "type": {
+                    "text": "HTTPResponseData"
+                  }
+                }
+              ],
+              "description": "Render response content",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "escapeHtml",
+              "parameters": [
+                {
+                  "name": "text",
+                  "description": "Text to escape",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Escape HTML special characters",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "highlightContentType",
+              "parameters": [
+                {
+                  "name": "value",
+                  "description": "Content-Type value",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Highlight Content-Type header value",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "formatBody",
+              "parameters": [
+                {
+                  "name": "body",
+                  "description": "Body content",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "headers",
+                  "description": "HTTP headers",
+                  "type": {
+                    "text": "Object.<string, string>"
+                  }
+                }
+              ],
+              "description": "Format body with syntax highlighting",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "formatJson",
+              "parameters": [
+                {
+                  "name": "obj",
+                  "description": "Object to format",
+                  "type": {
+                    "text": "*"
+                  }
+                },
+                {
+                  "name": "indent",
+                  "default": "0",
+                  "description": "Indentation level",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ],
+              "description": "Format JSON with syntax highlighting",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "highlightHtml",
+              "parameters": [
+                {
+                  "name": "html",
+                  "description": "Escaped HTML code",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Highlight HTML syntax",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "highlightCss",
+              "parameters": [
+                {
+                  "name": "css",
+                  "description": "Escaped CSS code",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Highlight CSS syntax",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "highlightJavaScript",
+              "parameters": [
+                {
+                  "name": "js",
+                  "description": "Escaped JavaScript code",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Highlight JavaScript syntax",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "field",
+              "name": "_data",
+              "type": {
+                "text": "null"
+              },
+              "default": "null"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "response"
+            },
+            {
+              "name": "theme"
+            },
+            {
+              "name": "highlight"
+            },
+            {
+              "name": "box"
+            },
+            {
+              "name": "show-header"
+            }
+          ],
+          "superclass": {
+            "name": "HTMLElement"
+          },
+          "tagName": "http-response",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "custom-element-definition",
+          "name": "http-response",
+          "declaration": {
+            "name": "HTTPResponseElement",
+            "module": "src/http-response.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "HTTPResponseElement",
+          "declaration": {
+            "name": "HTTPResponseElement",
+            "module": "src/http-response.js"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/http-transaction.js",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "HTTPTransactionElement - Web component for displaying HTTP request/response pairs\nDisplays data in raw HTTP wire format for educational purposes.\nComposes http-request and http-response sub-components.",
+          "name": "HTTPTransactionElement",
+          "members": [
+            {
+              "kind": "method",
+              "name": "updateTheme",
+              "description": "Update theme based on attribute or system preference\nSets theme to 'dark', 'light', or auto-detects from system"
+            },
+            {
+              "kind": "method",
+              "name": "updateChildThemes",
+              "description": "Update theme on child components",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "data",
+              "description": "Get current HTTP exchange data",
+              "parameters": [
+                {
+                  "description": "HTTP exchange data containing request and response",
+                  "name": "value",
+                  "type": {
+                    "text": "HTTPExchange"
+                  }
+                }
+              ],
+              "return": {
+                "type": {
+                  "text": "HTTPExchange|null"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getData",
+              "description": "Parse JSON attribute or use property data\nAttempts to parse 'request' and 'response' attributes as JSON",
+              "return": {
+                "type": {
+                  "text": "HTTPExchange"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "getHighlightConfig",
+              "description": "Parse highlight attribute and split into request/response highlights",
+              "return": {
+                "type": {
+                  "text": "Object"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "getBoxConfig",
+              "description": "Parse box attribute and split into request/response boxes",
+              "return": {
+                "type": {
+                  "text": "Object"
+                }
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "_data",
+              "type": {
+                "text": "null"
+              },
+              "default": "null"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "request"
+            },
+            {
+              "name": "response"
+            },
+            {
+              "name": "theme"
+            },
+            {
+              "name": "highlight"
+            },
+            {
+              "name": "box"
+            }
+          ],
+          "superclass": {
+            "name": "HTMLElement"
+          },
+          "tagName": "http-transaction",
+          "customElement": true
+        },
+        {
+          "kind": "class",
+          "description": "",
+          "name": "HTTPConsoleElement",
+          "superclass": {
+            "name": "HTTPTransactionElement",
+            "module": "src/http-transaction.js"
+          },
+          "tagName": "http-console",
+          "customElement": true,
+          "attributes": [
+            {
+              "name": "request",
+              "inheritedFrom": {
+                "name": "HTTPTransactionElement",
+                "module": "src/http-transaction.js"
+              }
+            },
+            {
+              "name": "response",
+              "inheritedFrom": {
+                "name": "HTTPTransactionElement",
+                "module": "src/http-transaction.js"
+              }
+            },
+            {
+              "name": "theme",
+              "inheritedFrom": {
+                "name": "HTTPTransactionElement",
+                "module": "src/http-transaction.js"
+              }
+            },
+            {
+              "name": "highlight",
+              "inheritedFrom": {
+                "name": "HTTPTransactionElement",
+                "module": "src/http-transaction.js"
+              }
+            },
+            {
+              "name": "box",
+              "inheritedFrom": {
+                "name": "HTTPTransactionElement",
+                "module": "src/http-transaction.js"
+              }
+            }
+          ],
+          "members": [
+            {
+              "kind": "method",
+              "name": "updateTheme",
+              "description": "Update theme based on attribute or system preference\nSets theme to 'dark', 'light', or auto-detects from system",
+              "inheritedFrom": {
+                "name": "HTTPTransactionElement",
+                "module": "src/http-transaction.js"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "updateChildThemes",
+              "description": "Update theme on child components",
+              "privacy": "private",
+              "inheritedFrom": {
+                "name": "HTTPTransactionElement",
+                "module": "src/http-transaction.js"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "data",
+              "description": "Get current HTTP exchange data",
+              "parameters": [
+                {
+                  "description": "HTTP exchange data containing request and response",
+                  "name": "value",
+                  "type": {
+                    "text": "HTTPExchange"
+                  }
+                }
+              ],
+              "return": {
+                "type": {
+                  "text": "HTTPExchange|null"
+                }
+              },
+              "inheritedFrom": {
+                "name": "HTTPTransactionElement",
+                "module": "src/http-transaction.js"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getData",
+              "description": "Parse JSON attribute or use property data\nAttempts to parse 'request' and 'response' attributes as JSON",
+              "return": {
+                "type": {
+                  "text": "HTTPExchange"
+                }
+              },
+              "privacy": "private",
+              "inheritedFrom": {
+                "name": "HTTPTransactionElement",
+                "module": "src/http-transaction.js"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getHighlightConfig",
+              "description": "Parse highlight attribute and split into request/response highlights",
+              "return": {
+                "type": {
+                  "text": "Object"
+                }
+              },
+              "privacy": "private",
+              "inheritedFrom": {
+                "name": "HTTPTransactionElement",
+                "module": "src/http-transaction.js"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getBoxConfig",
+              "description": "Parse box attribute and split into request/response boxes",
+              "return": {
+                "type": {
+                  "text": "Object"
+                }
+              },
+              "privacy": "private",
+              "inheritedFrom": {
+                "name": "HTTPTransactionElement",
+                "module": "src/http-transaction.js"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "_data",
+              "type": {
+                "text": "null"
+              },
+              "default": "null",
+              "inheritedFrom": {
+                "name": "HTTPTransactionElement",
+                "module": "src/http-transaction.js"
+              }
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "custom-element-definition",
+          "name": "http-transaction",
+          "declaration": {
+            "name": "HTTPTransactionElement",
+            "module": "src/http-transaction.js"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "http-console",
+          "declaration": {
+            "name": "HTTPConsoleElement",
+            "module": "src/http-transaction.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "HTTPTransactionElement",
+          "declaration": {
+            "name": "HTTPTransactionElement",
+            "module": "src/http-transaction.js"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
       "path": "src/http-waterfall.js",
       "declarations": [
         {
@@ -600,7 +1656,7 @@
             {
               "kind": "method",
               "name": "updateChildThemes",
-              "description": "Update theme on child http-console elements"
+              "description": "Update theme on child http-transaction/http-console elements"
             },
             {
               "kind": "field",
@@ -688,10 +1744,6 @@
                   "name": "index"
                 }
               ]
-            },
-            {
-              "kind": "method",
-              "name": "render"
             },
             {
               "kind": "method",
@@ -839,6 +1891,95 @@
               "name": "attachViewEventListeners"
             },
             {
+              "kind": "method",
+              "name": "toggleExplorer",
+              "description": "Toggle the explorer panel open/closed"
+            },
+            {
+              "kind": "method",
+              "name": "renderExplorer",
+              "description": "Render the explorer/request builder panel"
+            },
+            {
+              "kind": "method",
+              "name": "renderExplorerContent",
+              "description": "Render the explorer form content",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "renderHeaderRow",
+              "parameters": [
+                {
+                  "name": "header",
+                  "description": "Header object with name and value",
+                  "type": {
+                    "text": "Object"
+                  }
+                },
+                {
+                  "name": "index",
+                  "description": "Row index",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ],
+              "description": "Render a single header row",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "attachExplorerEventListeners",
+              "description": "Attach event listeners for the explorer panel"
+            },
+            {
+              "kind": "method",
+              "name": "addExplorerHeader",
+              "description": "Add a new header row to the explorer"
+            },
+            {
+              "kind": "method",
+              "name": "updateExplorerHeader",
+              "parameters": [
+                {
+                  "name": "input",
+                  "description": "Input element",
+                  "type": {
+                    "text": "HTMLInputElement"
+                  }
+                }
+              ],
+              "description": "Update a header value in the explorer"
+            },
+            {
+              "kind": "method",
+              "name": "removeExplorerHeader",
+              "parameters": [
+                {
+                  "name": "index",
+                  "description": "Header index",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ],
+              "description": "Remove a header row from the explorer"
+            },
+            {
+              "kind": "method",
+              "name": "sendExplorerRequest",
+              "description": "Send the request built in the explorer"
+            },
+            {
               "kind": "field",
               "name": "_exchanges",
               "type": {
@@ -898,6 +2039,58 @@
                 "text": "null"
               },
               "default": "null"
+            },
+            {
+              "kind": "field",
+              "name": "_explorerOpen",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "_explorerHeaders",
+              "type": {
+                "text": "array"
+              },
+              "default": "[{ name: '', value: '' }]"
+            },
+            {
+              "kind": "field",
+              "name": "_explorerLoading",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "_explorerStatus",
+              "type": {
+                "text": "null"
+              },
+              "default": "null"
+            }
+          ],
+          "events": [
+            {
+              "name": "request-sent",
+              "type": {
+                "text": "CustomEvent"
+              }
+            },
+            {
+              "name": "response-received",
+              "type": {
+                "text": "CustomEvent"
+              }
+            },
+            {
+              "name": "request-error",
+              "type": {
+                "text": "CustomEvent"
+              }
             }
           ],
           "attributes": [
@@ -918,6 +2111,9 @@
             },
             {
               "name": "theme"
+            },
+            {
+              "name": "explorer"
             }
           ],
           "superclass": {
@@ -925,12 +2121,36 @@
           },
           "tagName": "http-waterfall",
           "customElement": true
+        },
+        {
+          "kind": "variable",
+          "name": "method"
+        },
+        {
+          "kind": "variable",
+          "name": "url"
+        },
+        {
+          "kind": "variable",
+          "name": "headers",
+          "type": {
+            "text": "object"
+          },
+          "default": "{}"
         }
       ],
       "exports": [
         {
           "kind": "custom-element-definition",
           "name": "http-waterfall",
+          "declaration": {
+            "name": "HTTPWaterfallElement",
+            "module": "src/http-waterfall.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "HTTPWaterfallElement",
           "declaration": {
             "name": "HTTPWaterfallElement",
             "module": "src/http-waterfall.js"

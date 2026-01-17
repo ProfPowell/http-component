@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP Component Test Page</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .test-section {
+      margin-bottom: 40px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    h2 {
+      margin-top: 0;
+      color: #374151;
+    }
+  </style>
+</head>
+<body>
+  <h1>HTTP Component Test Harness</h1>
+
+  <div class="test-section" id="section-transaction">
+    <h2>http-transaction</h2>
+    <http-transaction id="test-transaction"></http-transaction>
+  </div>
+
+  <div class="test-section" id="section-request">
+    <h2>http-request</h2>
+    <http-request id="test-request"></http-request>
+  </div>
+
+  <div class="test-section" id="section-response">
+    <h2>http-response</h2>
+    <http-response id="test-response"></http-response>
+  </div>
+
+  <div class="test-section" id="section-waterfall">
+    <h2>http-waterfall</h2>
+    <http-waterfall id="test-waterfall" view="list"></http-waterfall>
+  </div>
+
+  <div class="test-section" id="section-explorer">
+    <h2>http-waterfall with explorer</h2>
+    <http-waterfall id="test-explorer" explorer></http-waterfall>
+  </div>
+
+  <script type="module" src="../src/http-transaction.js"></script>
+  <script type="module" src="../src/http-waterfall.js"></script>
+  <script type="module">
+    await customElements.whenDefined('http-transaction');
+    await customElements.whenDefined('http-request');
+    await customElements.whenDefined('http-response');
+    await customElements.whenDefined('http-waterfall');
+
+    // Set test data for transaction
+    document.getElementById('test-transaction').data = {
+      request: {
+        method: 'GET',
+        url: '/api/test',
+        httpVersion: 'HTTP/1.1',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer test-token'
+        }
+      },
+      response: {
+        status: 200,
+        statusText: 'OK',
+        httpVersion: 'HTTP/1.1',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ success: true, id: 1 }, null, 2)
+      }
+    };
+
+    // Set test data for request
+    document.getElementById('test-request').data = {
+      method: 'POST',
+      url: '/api/users',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ name: 'Test User' }, null, 2)
+    };
+
+    // Set test data for response
+    document.getElementById('test-response').data = {
+      status: 201,
+      statusText: 'Created',
+      headers: {
+        'Content-Type': 'application/json',
+        'Location': '/api/users/123'
+      },
+      body: JSON.stringify({ id: 123, name: 'Test User' }, null, 2)
+    };
+
+    // Set test data for waterfall
+    document.getElementById('test-waterfall').exchanges = [
+      {
+        request: { method: 'GET', url: '/api/users', headers: {} },
+        response: { status: 200, statusText: 'OK', headers: { 'Content-Type': 'application/json' }, body: '[]' },
+        timing: { startTime: 0, endTime: 100, duration: 100 }
+      },
+      {
+        request: { method: 'POST', url: '/api/users', headers: { 'Content-Type': 'application/json' } },
+        response: { status: 201, statusText: 'Created', headers: {}, body: '{}' },
+        timing: { startTime: 50, endTime: 150, duration: 100 }
+      },
+      {
+        request: { method: 'GET', url: '/api/users/404', headers: {} },
+        response: { status: 404, statusText: 'Not Found', headers: {}, body: '{}' },
+        timing: { startTime: 100, endTime: 180, duration: 80 }
+      }
+    ];
+
+    // Signal that components are ready
+    window.componentsReady = true;
+    window.dispatchEvent(new Event('components-ready'));
+  </script>
+</body>
+</html>

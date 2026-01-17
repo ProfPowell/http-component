@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Reference - HTTP Component</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="container">
+      <a href="index.html" class="nav-brand">HTTP Component</a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="demos.html">Demos</a></li>
+        <li><a href="api.html" class="active">API</a></li>
+        <li><a href="https://github.com/ProfPowell/http-component" target="_blank">GitHub</a></li>
+        <li><button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section>
+    <div class="container">
+      <h2>API Reference</h2>
+
+      <!-- http-transaction -->
+      <div class="api-section" id="http-transaction">
+        <h3>&lt;http-transaction&gt;</h3>
+        <p>Displays a complete HTTP request/response pair side by side. This is the main component for showing HTTP exchanges.</p>
+
+        <h4>Attributes</h4>
+        <table class="api-table">
+          <thead>
+            <tr><th>Attribute</th><th>Type</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>theme</code></td><td>string</td><td>Color theme: <code>"light"</code>, <code>"dark"</code>, or <code>"auto"</code> (default)</td></tr>
+            <tr><td><code>highlight</code></td><td>string</td><td>Comma-separated sections to highlight: <code>request-line</code>, <code>request-headers</code>, <code>request-body</code>, <code>response-line</code>, <code>response-headers</code>, <code>response-body</code></td></tr>
+            <tr><td><code>box</code></td><td>string</td><td>Comma-separated sections to add labeled borders: same values as highlight</td></tr>
+          </tbody>
+        </table>
+
+        <h4>Properties</h4>
+        <table class="api-table">
+          <thead>
+            <tr><th>Property</th><th>Type</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>data</code></td>
+              <td>Object</td>
+              <td>
+                HTTP exchange data with structure:
+                <pre><code>{
+  request: {
+    method: string,
+    url: string,
+    httpVersion?: string,
+    headers?: Object,
+    body?: string
+  },
+  response: {
+    status: number,
+    statusText: string,
+    httpVersion?: string,
+    headers?: Object,
+    body?: string
+  }
+}</code></pre>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>CSS Custom Properties</h4>
+        <table class="api-table">
+          <thead>
+            <tr><th>Property</th><th>Default</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>--bg-primary</code></td><td>#f5f5f5</td><td>Primary background color</td></tr>
+            <tr><td><code>--bg-secondary</code></td><td>white</td><td>Secondary background color</td></tr>
+            <tr><td><code>--border-color</code></td><td>#ddd</td><td>Border color</td></tr>
+            <tr><td><code>--text-primary</code></td><td>#1f2937</td><td>Primary text color</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- http-request -->
+      <div class="api-section" id="http-request">
+        <h3>&lt;http-request&gt;</h3>
+        <p>Displays just the HTTP request portion: method, URL, headers, and body.</p>
+
+        <h4>Attributes</h4>
+        <table class="api-table">
+          <thead>
+            <tr><th>Attribute</th><th>Type</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>theme</code></td><td>string</td><td>Color theme: <code>"light"</code>, <code>"dark"</code>, or <code>"auto"</code></td></tr>
+            <tr><td><code>highlight</code></td><td>string</td><td>Sections to highlight: <code>request-line</code>, <code>headers</code>, <code>body</code>, or <code>header:name</code></td></tr>
+            <tr><td><code>box</code></td><td>string</td><td>Sections to add labeled borders</td></tr>
+            <tr><td><code>show-header</code></td><td>boolean</td><td>Show/hide the "Request" header bar (default: true)</td></tr>
+          </tbody>
+        </table>
+
+        <h4>Properties</h4>
+        <table class="api-table">
+          <thead>
+            <tr><th>Property</th><th>Type</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>data</code></td>
+              <td>Object</td>
+              <td>
+                Request data:
+                <pre><code>{
+  method: string,
+  url: string,
+  httpVersion?: string,
+  headers?: Object,
+  body?: string
+}</code></pre>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- http-response -->
+      <div class="api-section" id="http-response">
+        <h3>&lt;http-response&gt;</h3>
+        <p>Displays just the HTTP response portion: status line, headers, and body.</p>
+
+        <h4>Attributes</h4>
+        <table class="api-table">
+          <thead>
+            <tr><th>Attribute</th><th>Type</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>theme</code></td><td>string</td><td>Color theme: <code>"light"</code>, <code>"dark"</code>, or <code>"auto"</code></td></tr>
+            <tr><td><code>highlight</code></td><td>string</td><td>Sections to highlight: <code>status-line</code>, <code>headers</code>, <code>body</code>, or <code>header:name</code></td></tr>
+            <tr><td><code>box</code></td><td>string</td><td>Sections to add labeled borders</td></tr>
+            <tr><td><code>show-header</code></td><td>boolean</td><td>Show/hide the "Response" header bar (default: true)</td></tr>
+          </tbody>
+        </table>
+
+        <h4>Properties</h4>
+        <table class="api-table">
+          <thead>
+            <tr><th>Property</th><th>Type</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>data</code></td>
+              <td>Object</td>
+              <td>
+                Response data:
+                <pre><code>{
+  status: number,
+  statusText: string,
+  httpVersion?: string,
+  headers?: Object,
+  body?: string
+}</code></pre>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- http-waterfall -->
+      <div class="api-section" id="http-waterfall">
+        <h3>&lt;http-waterfall&gt;</h3>
+        <p>Visualizes multiple HTTP exchanges with list, duration, and waterfall timeline views. Supports live capture and a built-in request builder.</p>
+
+        <h4>Attributes</h4>
+        <table class="api-table">
+          <thead>
+            <tr><th>Attribute</th><th>Type</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>view</code></td><td>string</td><td>View mode: <code>"list"</code>, <code>"duration"</code>, or <code>"waterfall"</code></td></tr>
+            <tr><td><code>theme</code></td><td>string</td><td>Color theme: <code>"light"</code>, <code>"dark"</code>, or <code>"auto"</code></td></tr>
+            <tr><td><code>capture</code></td><td>boolean</td><td>Enable live capture of fetch/XHR requests</td></tr>
+            <tr><td><code>filter</code></td><td>string</td><td>URL pattern filter for capture (supports * wildcards)</td></tr>
+            <tr><td><code>max-entries</code></td><td>number</td><td>Maximum number of entries to display (default: 100)</td></tr>
+            <tr><td><code>explorer</code></td><td>boolean</td><td>Show the request builder panel</td></tr>
+          </tbody>
+        </table>
+
+        <h4>Properties</h4>
+        <table class="api-table">
+          <thead>
+            <tr><th>Property</th><th>Type</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>exchanges</code></td>
+              <td>Array</td>
+              <td>
+                Array of HTTP exchanges with timing:
+                <pre><code>[{
+  request: { method, url, headers, body },
+  response: { status, statusText, headers, body },
+  timing: { startTime, endTime, duration }
+}]</code></pre>
+              </td>
+            </tr>
+            <tr><td><code>view</code></td><td>string</td><td>Get/set current view mode</td></tr>
+          </tbody>
+        </table>
+
+        <h4>Events</h4>
+        <table class="api-table">
+          <thead>
+            <tr><th>Event</th><th>Detail</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>request-sent</code></td><td><code>{ method, url, headers, body }</code></td><td>Fired when explorer sends a request</td></tr>
+            <tr><td><code>response-received</code></td><td><code>{ request, response, timing }</code></td><td>Fired when explorer receives a response</td></tr>
+            <tr><td><code>request-error</code></td><td><code>{ error }</code></td><td>Fired when explorer request fails</td></tr>
+          </tbody>
+        </table>
+
+        <h4>Methods</h4>
+        <table class="api-table">
+          <thead>
+            <tr><th>Method</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>startCapture()</code></td><td>Start capturing HTTP requests</td></tr>
+            <tr><td><code>stopCapture()</code></td><td>Stop capturing</td></tr>
+            <tr><td><code>togglePause()</code></td><td>Pause/resume capturing</td></tr>
+            <tr><td><code>clearExchanges()</code></td><td>Clear all captured exchanges</td></tr>
+            <tr><td><code>toggleExplorer()</code></td><td>Open/close the request builder panel</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- HTTPInterceptor -->
+      <div class="api-section" id="http-interceptor">
+        <h3>HTTPInterceptor (Utility Class)</h3>
+        <p>A utility class for intercepting fetch() and XMLHttpRequest calls. Used internally by http-waterfall but can be used standalone.</p>
+
+        <h4>Usage</h4>
+        <pre><code>import { HTTPInterceptor } from '@profpowell/http-component/http-interceptor';
+
+const interceptor = new HTTPInterceptor();
+
+interceptor.start((exchange) => {
+  console.log('Captured:', exchange.request.method, exchange.request.url);
+}, {
+  filter: '/api/*',
+  maxBodySize: 1024 * 1024
+});
+
+// Later, stop intercepting
+interceptor.stop();</code></pre>
+
+        <h4>Methods</h4>
+        <table class="api-table">
+          <thead>
+            <tr><th>Method</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>start(callback, options)</code></td><td>Start intercepting with callback and options</td></tr>
+            <tr><td><code>stop()</code></td><td>Stop intercepting and restore original functions</td></tr>
+            <tr><td><code>pause()</code></td><td>Pause forwarding to listeners</td></tr>
+            <tr><td><code>resume()</code></td><td>Resume forwarding to listeners</td></tr>
+            <tr><td><code>addListener(callback)</code></td><td>Add additional listener</td></tr>
+            <tr><td><code>removeListener(callback)</code></td><td>Remove a listener</td></tr>
+          </tbody>
+        </table>
+
+        <h4>Options</h4>
+        <table class="api-table">
+          <thead>
+            <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>filter</code></td><td>string</td><td>null</td><td>URL pattern filter (* wildcard supported)</td></tr>
+            <tr><td><code>maxBodySize</code></td><td>number</td><td>1MB</td><td>Maximum body size to capture</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <p>HTTP Component is open source. <a href="https://github.com/ProfPowell/http-component">View on GitHub</a></p>
+    </div>
+  </footer>
+
+  <script>
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+
+    // Load saved theme or detect system preference
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+      document.documentElement.setAttribute('data-theme', saved);
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
+</body>
+</html>

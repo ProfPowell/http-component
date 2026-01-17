@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP Component - Web Components for HTTP Visualization</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="container">
+      <a href="index.html" class="nav-brand">HTTP Component</a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="demos.html">Demos</a></li>
+        <li><a href="api.html">API</a></li>
+        <li><a href="https://github.com/ProfPowell/http-component" target="_blank">GitHub</a></li>
+        <li><button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <h1>HTTP Component</h1>
+      <p class="tagline">Educational web components for visualizing HTTP request/response data</p>
+      <div class="hero-buttons">
+        <a href="demos.html" class="btn btn-primary">View Demos</a>
+        <a href="api.html" class="btn btn-secondary">API Reference</a>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2>Features</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3>Wire Format Display</h3>
+          <p>Show HTTP data in the actual wire format students learn in networking courses.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Syntax Highlighting</h3>
+          <p>Automatic highlighting for JSON, HTML, CSS, and JavaScript content types.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Multiple Views</h3>
+          <p>List, Duration, and Waterfall views for visualizing multiple requests.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Live Capture</h3>
+          <p>Intercept and display real fetch() and XMLHttpRequest calls in real-time.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Request Builder</h3>
+          <p>Built-in explorer for building and sending HTTP requests interactively.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Zero Dependencies</h3>
+          <p>Pure vanilla JavaScript web components with no external dependencies.</p>
+        </div>
+      </div>
+
+      <div class="quick-start">
+        <h3>Quick Start</h3>
+
+        <h4>Install via npm</h4>
+        <pre><code>npm install @profpowell/http-component</code></pre>
+
+        <h4>Or use via CDN</h4>
+        <pre><code>&lt;script type="module" src="https://unpkg.com/@profpowell/http-component"&gt;&lt;/script&gt;</code></pre>
+
+        <h4>Basic Usage</h4>
+        <pre><code>&lt;http-transaction id="demo"&gt;&lt;/http-transaction&gt;
+
+&lt;script type="module"&gt;
+  import '@profpowell/http-component';
+
+  document.getElementById('demo').data = {
+    request: {
+      method: 'GET',
+      url: '/api/users',
+      headers: { 'Accept': 'application/json' }
+    },
+    response: {
+      status: 200,
+      statusText: 'OK',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: 1, name: 'John' })
+    }
+  };
+&lt;/script&gt;</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section style="background: var(--bg-secondary);">
+    <div class="container">
+      <h2>Components</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3><code>&lt;http-transaction&gt;</code></h3>
+          <p>Display a complete HTTP request/response pair side by side in wire format.</p>
+        </div>
+        <div class="feature-card">
+          <h3><code>&lt;http-request&gt;</code></h3>
+          <p>Display just the request portion: method, URL, headers, and body.</p>
+        </div>
+        <div class="feature-card">
+          <h3><code>&lt;http-response&gt;</code></h3>
+          <p>Display just the response portion: status, headers, and body.</p>
+        </div>
+        <div class="feature-card">
+          <h3><code>&lt;http-waterfall&gt;</code></h3>
+          <p>Visualize multiple HTTP requests with list, duration, and waterfall views.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <p>HTTP Component is open source. <a href="https://github.com/ProfPowell/http-component">View on GitHub</a></p>
+    </div>
+  </footer>
+
+  <script>
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+
+    // Load saved theme or detect system preference
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+      document.documentElement.setAttribute('data-theme', saved);
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
+</body>
+</html>

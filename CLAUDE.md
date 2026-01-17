@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-HTTP Console Web Component - A dependency-free vanilla web component system for displaying HTTP request/response data in educational formats.
+HTTP Component - A dependency-free vanilla web component system for displaying HTTP request/response data in educational formats.
 
 ## Development Commands
 
@@ -12,109 +12,141 @@ HTTP Console Web Component - A dependency-free vanilla web component system for 
 # Install dependencies
 npm install
 
-# Start development server (no caching, opens browser to /demo)
+# Start development server (opens browser to /docs)
 npm run dev
 
-# Server will be available at http://localhost:8081
+# Build for production
+npm run build
+
+# Run tests
+npm run test
+
+# Run tests with UI
+npm run test:ui
+
+# Lint and format
+npm run lint
+npm run format
 ```
 
 ## Project Structure
 
 ```
-src/
-  http-console.js       - Single request/response display component
-  http-waterfall.js     - Multiple requests list/waterfall component
-css/
-  http-console.css      - Styles for http-console component
-  http-waterfall.css    - Styles for http-waterfall component
-demo/
-  index.html           - Demo of http-console component
-  waterfall.html       - Demo of http-waterfall component
+http-component/
+├── src/
+│   ├── http-component.js    - Barrel file (exports all components)
+│   ├── http-message.js      - Base component for headers/body display
+│   ├── http-request.js      - Request display (method, URL, headers, body)
+│   ├── http-response.js     - Response display (status, headers, body)
+│   ├── http-transaction.js  - Request + Response pair (main component)
+│   ├── http-waterfall.js    - Multiple requests with list/timeline + explorer
+│   └── http-interceptor.js  - Utility for live capture
+├── dist/                    - Built output (npm run build)
+├── docs/                    - Documentation site
+│   ├── index.html          - Home page
+│   ├── demos.html          - Interactive demos
+│   ├── api.html            - API reference
+│   └── styles.css          - Shared styles
+├── test/                    - Playwright tests
+│   ├── test-page.html      - Test harness
+│   ├── http-transaction.spec.js
+│   └── http-waterfall.spec.js
+├── http-component.d.ts      - TypeScript definitions
+├── vite.config.js           - Vite build configuration
+├── playwright.config.js     - Playwright test configuration
+└── package.json
 ```
 
 ## Components
 
-Two primary web components:
-- `<http-console>`: Single request/response display in raw HTTP wire format
-- `<http-waterfall>`: Multiple requests with list view and timeline visualization
+Five web components with a clear hierarchy:
+
+- `<http-message>`: Base component for rendering headers and body (internal use)
+- `<http-request>`: Displays HTTP request with method coloring
+- `<http-response>`: Displays HTTP response with status code coloring
+- `<http-transaction>`: Complete request/response pair (also registered as `<http-console>` for backwards compatibility)
+- `<http-waterfall>`: Multiple exchanges with list/duration/waterfall views + built-in request explorer
 
 ## Architecture
 
 ### Component Hierarchy
 
 ```
-http-console (single exchange)
+http-transaction (single exchange)
 ├── http-request
-│   ├── request-line
-│   ├── header-list
-│   └── body-viewer
+│   ├── request-line (METHOD URL HTTP/version)
+│   ├── headers
+│   └── body (syntax highlighted)
 └── http-response
-    ├── status-line
-    ├── header-list
-    └── body-viewer
+    ├── status-line (HTTP/version STATUS REASON)
+    ├── headers
+    └── body (syntax highlighted)
 
 http-waterfall (multiple exchanges)
-├── toolbar
-├── list-view
-│   └── exchange-row (repeating, expandable to http-console)
-└── waterfall-view
-    ├── timeline-header
-    └── waterfall-row (repeating)
+├── toolbar (view toggle, capture controls)
+├── explorer-panel (request builder, collapsible)
+├── view-container
+│   ├── list-view (expandable rows → http-transaction)
+│   ├── duration-view (horizontal bars)
+│   └── waterfall-view (timeline with offsets)
 ```
 
 ### Data Schema
 
-Components accept JSON data with this structure:
-- Single exchange: `{ request: {...}, response: {...}, timing: {...} }`
-- Multiple exchanges: `{ exchanges: [...], meta: {...} }`
+```javascript
+// Single exchange (http-transaction)
+{
+  request: {
+    method: 'GET',
+    url: '/api/users',
+    httpVersion: 'HTTP/1.1',
+    headers: { 'Accept': 'application/json' },
+    body: null
+  },
+  response: {
+    status: 200,
+    statusText: 'OK',
+    httpVersion: 'HTTP/1.1',
+    headers: { 'Content-Type': 'application/json' },
+    body: '{"id": 1}'
+  }
+}
 
-Request objects include: method, url, httpVersion, headers, body
-Response objects include: status, statusText, httpVersion, headers, body
-Timing objects include: startTime, endTime, duration, phases (optional)
+// Multiple exchanges (http-waterfall)
+[{
+  request: {...},
+  response: {...},
+  timing: { startTime: 0, endTime: 100, duration: 100 }
+}]
+```
 
-### Input Methods
+### Key Features
 
-1. **Declarative**: Pass data via attributes/properties
-2. **Interceptor**: Capture actual fetch/XHR calls from page (Phase 4 feature)
-
-## Implementation Phases
-
-The project follows a phased approach:
-
-**Phase 1 (MVP)**: `http-console` component accepting JSON data, rendering raw HTTP format
-**Phase 2**: `http-waterfall` list view with expandable rows
-**Phase 3**: Waterfall timeline visualization with horizontal duration bars
-**Phase 4**: Request interception via fetch/XHR patching with Performance API integration
-**Phase 5**: Enhancements (JSON pretty-printing, copy buttons, HAR export, filtering, sorting)
+- **Syntax Highlighting**: JSON, HTML, CSS, JavaScript
+- **Theme Support**: Light/dark modes with auto-detection
+- **Live Capture**: Intercept fetch() and XMLHttpRequest
+- **Request Builder**: Built into http-waterfall (explorer attribute)
+- **Highlighting/Boxing**: Emphasize specific sections via attributes
 
 ## Key Design Decisions
 
 ### Display Format
-Show actual HTTP wire format rather than pretty-printed data:
+Show actual HTTP wire format:
 ```
 GET /api/users HTTP/1.1
 Host: example.com
 Accept: application/json
 ```
 
-### Waterfall Rendering
-Use CSS custom properties and transforms for positioning timing bars:
-```css
-.timing-bar {
-  transform: translateX(calc(var(--start-offset) * 1px));
-  width: calc(var(--duration) * var(--px-per-ms));
-}
-```
+### Styling
+All styles are inline in component JS files (no external CSS). CSS custom properties enable theming.
 
-### Request Interception
-Wrap both `window.fetch` and `XMLHttpRequest` to capture all HTTP traffic. Use Performance API for accurate timing. Clone responses to read body without consuming the stream.
-
-### Scalability
-For large request sets: virtual scrolling in list view, configurable max entries (50-100 default), aggregation of similar requests.
+### Backwards Compatibility
+`<http-console>` is registered as an alias for `<http-transaction>`.
 
 ## Development Principles
 
 - **Zero dependencies**: Vanilla JavaScript web components only
 - **Educational focus**: Display data in formats that teach HTTP protocol details
-- **Progressive enhancement**: Start with manual data display, add live capture later
 - **Content type awareness**: Smart rendering based on Content-Type headers
+- **Progressive enhancement**: Manual data display + live capture option
