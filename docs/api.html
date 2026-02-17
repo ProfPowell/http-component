@@ -5,23 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>API Reference - HTTP Component</title>
   <link rel="stylesheet" href="styles.css">
+  <script type="module" src="https://unpkg.com/@profpowell/code-block"></script>
 </head>
 <body>
-  <nav class="nav">
-    <div class="container">
-      <a href="index.html" class="nav-brand">HTTP Component</a>
-      <ul class="nav-links">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="demos.html">Demos</a></li>
-        <li><a href="api.html" class="active">API</a></li>
-        <li><a href="https://github.com/ProfPowell/http-component" target="_blank">GitHub</a></li>
-        <li><button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button></li>
-      </ul>
-    </div>
-  </nav>
+  <header class="site-header">
+    <nav>
+      <a href="index.html" class="nav-brand">&lt;http-component&gt;</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="demos.html">Demos</a>
+        <a href="api.html" class="active">API</a>
+        <a href="https://github.com/ProfPowell/http-component">GitHub</a>
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">&#127763;</button>
+      </div>
+    </nav>
+  </header>
 
-  <section>
-    <div class="container">
+  <main>
+    <section>
       <h2>API Reference</h2>
 
       <!-- http-transaction -->
@@ -52,7 +53,7 @@
               <td>Object</td>
               <td>
                 HTTP exchange data with structure:
-                <pre><code>{
+                <code-block language="javascript">{
   request: {
     method: string,
     url: string,
@@ -67,7 +68,7 @@
     headers?: Object,
     body?: string
   }
-}</code></pre>
+}</code-block>
               </td>
             </tr>
           </tbody>
@@ -116,13 +117,13 @@
               <td>Object</td>
               <td>
                 Request data:
-                <pre><code>{
+                <code-block language="javascript">{
   method: string,
   url: string,
   httpVersion?: string,
   headers?: Object,
   body?: string
-}</code></pre>
+}</code-block>
               </td>
             </tr>
           </tbody>
@@ -158,13 +159,13 @@
               <td>Object</td>
               <td>
                 Response data:
-                <pre><code>{
+                <code-block language="javascript">{
   status: number,
   statusText: string,
   httpVersion?: string,
   headers?: Object,
   body?: string
-}</code></pre>
+}</code-block>
               </td>
             </tr>
           </tbody>
@@ -202,11 +203,11 @@
               <td>Array</td>
               <td>
                 Array of HTTP exchanges with timing:
-                <pre><code>[{
+                <code-block language="javascript">[{
   request: { method, url, headers, body },
   response: { status, statusText, headers, body },
   timing: { startTime, endTime, duration }
-}]</code></pre>
+}]</code-block>
               </td>
             </tr>
             <tr><td><code>view</code></td><td>string</td><td>Get/set current view mode</td></tr>
@@ -246,7 +247,7 @@
         <p>A utility class for intercepting fetch() and XMLHttpRequest calls. Used internally by http-waterfall but can be used standalone.</p>
 
         <h4>Usage</h4>
-        <pre><code>import { HTTPInterceptor } from '@profpowell/http-component/http-interceptor';
+        <code-block language="javascript">import { HTTPInterceptor } from '@profpowell/http-component/http-interceptor';
 
 const interceptor = new HTTPInterceptor();
 
@@ -258,7 +259,7 @@ interceptor.start((exchange) => {
 });
 
 // Later, stop intercepting
-interceptor.stop();</code></pre>
+interceptor.stop();</code-block>
 
         <h4>Methods</h4>
         <table class="api-table">
@@ -287,29 +288,43 @@ interceptor.stop();</code></pre>
         </table>
       </div>
 
-    </div>
-  </section>
+    </section>
 
-  <footer class="footer">
-    <div class="container">
-      <p>HTTP Component is open source. <a href="https://github.com/ProfPowell/http-component">View on GitHub</a></p>
-    </div>
+    <section class="related">
+      <h2>Related Components</h2>
+      <p>Part of the ProfPowell vanilla web components suite:</p>
+      <div class="related-grid">
+        <a href="https://profpowell.github.io/code-block/" class="related-card">
+          <strong>&lt;code-block&gt;</strong>
+          <span>Syntax highlighted code blocks</span>
+        </a>
+        <a href="https://profpowell.github.io/browser-window/" class="related-card">
+          <strong>&lt;browser-window&gt;</strong>
+          <span>Safari-style browser window frames</span>
+        </a>
+        <a href="https://profpowell.github.io/terminal-window/" class="related-card">
+          <strong>&lt;terminal-window&gt;</strong>
+          <span>Interactive terminal emulator</span>
+        </a>
+        <a href="https://profpowell.github.io/browser-console/" class="related-card">
+          <strong>&lt;browser-console&gt;</strong>
+          <span>Console log display component</span>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>MIT License &middot; <a href="https://github.com/ProfPowell/http-component">View on GitHub</a></p>
   </footer>
 
   <script>
     function toggleTheme() {
-      const current = document.documentElement.getAttribute('data-theme');
-      const next = current === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('theme', next);
+      document.body.classList.toggle('dark');
+      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
     }
-
-    // Load saved theme or detect system preference
-    const saved = localStorage.getItem('theme');
-    if (saved) {
-      document.documentElement.setAttribute('data-theme', saved);
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      document.documentElement.setAttribute('data-theme', 'dark');
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark');
     }
   </script>
 </body>

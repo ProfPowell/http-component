@@ -16,7 +16,7 @@
   --font-mono: 'Courier New', Courier, monospace;
 }
 
-[data-theme="dark"] {
+body.dark {
   --bg-primary: #111827;
   --bg-secondary: #1f2937;
   --bg-tertiary: #374151;
@@ -43,23 +43,26 @@ body {
   background: var(--bg-primary);
 }
 
-.container {
+/* Main content wrapper */
+main {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 2rem;
 }
 
 /* Navigation */
-.nav {
+.site-header {
   position: sticky;
   top: 0;
   background: var(--bg-primary);
   border-bottom: 1px solid var(--border-color);
   z-index: 100;
-  padding: 16px 0;
+  padding: 16px 20px;
 }
 
-.nav .container {
+.site-header nav {
+  max-width: 1200px;
+  margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -68,6 +71,7 @@ body {
 .nav-brand {
   font-weight: 700;
   font-size: 1.25rem;
+  font-family: var(--font-mono);
   color: var(--text-primary);
   text-decoration: none;
 }
@@ -93,23 +97,22 @@ body {
 }
 
 .theme-toggle {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  padding: 8px 12px;
-  border-radius: 6px;
+  background: none;
+  border: none;
+  padding: 4px;
   cursor: pointer;
-  font-size: 14px;
-  color: var(--text-primary);
-  transition: all 0.2s;
+  font-size: 1.25rem;
+  line-height: 1;
+  transition: opacity 0.2s;
 }
 
 .theme-toggle:hover {
-  background: var(--bg-secondary);
+  opacity: 0.7;
 }
 
 /* Hero Section */
 .hero {
-  padding: 80px 0;
+  padding: 80px 20px;
   text-align: center;
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
@@ -148,24 +151,24 @@ body {
   transition: all 0.2s;
 }
 
-.btn-primary {
+.btn.primary {
   background: var(--primary);
   color: white;
   border-color: var(--primary);
 }
 
-.btn-primary:hover {
+.btn.primary:hover {
   background: var(--primary-hover);
   border-color: var(--primary-hover);
 }
 
-.btn-secondary {
+.btn.secondary {
   background: transparent;
   color: var(--primary);
   border-color: var(--primary);
 }
 
-.btn-secondary:hover {
+.btn.secondary:hover {
   background: var(--primary);
   color: white;
 }
@@ -182,8 +185,8 @@ section h2 {
   color: var(--text-primary);
 }
 
-/* Features Grid */
-.features-grid {
+/* Feature Grid */
+.feature-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 24px;
@@ -231,6 +234,20 @@ code {
   padding: 2px 6px;
   border-radius: 3px;
   font-size: 0.9em;
+}
+
+/* code-block fallback before custom element is defined */
+code-block:not(:defined) {
+  display: block;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 16px;
+  margin: 16px 0;
+  white-space: pre;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  overflow-x: auto;
 }
 
 /* Demo Sections */
@@ -354,14 +371,65 @@ code {
   font-size: 14px;
 }
 
-[data-theme="dark"] .info-box {
+body.dark .info-box {
   background: #1e3a8a;
   border-color: #3b82f6;
   color: #dbeafe;
 }
 
+/* Related Components */
+.related {
+  padding: 60px 0;
+  border-top: 1px solid var(--border-color);
+}
+
+.related h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.related > p {
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.related-card {
+  display: block;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 20px;
+  text-decoration: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.related-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.related-card strong {
+  display: block;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.related-card span {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
 /* Footer */
-.footer {
+.site-footer {
   padding: 40px 0;
   background: var(--bg-secondary);
   border-top: 1px solid var(--border-color);
@@ -370,12 +438,12 @@ code {
   font-size: 0.9rem;
 }
 
-.footer a {
+.site-footer a {
   color: var(--primary);
   text-decoration: none;
 }
 
-.footer a:hover {
+.site-footer a:hover {
   text-decoration: underline;
 }
 
@@ -410,7 +478,7 @@ http-waterfall {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .nav .container {
+  .site-header nav {
     flex-direction: column;
     gap: 16px;
   }

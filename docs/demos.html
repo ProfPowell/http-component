@@ -5,23 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Demos - HTTP Component</title>
   <link rel="stylesheet" href="styles.css">
+  <script type="module" src="https://unpkg.com/@profpowell/code-block"></script>
 </head>
 <body>
-  <nav class="nav">
-    <div class="container">
-      <a href="index.html" class="nav-brand">HTTP Component</a>
-      <ul class="nav-links">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="demos.html" class="active">Demos</a></li>
-        <li><a href="api.html">API</a></li>
-        <li><a href="https://github.com/ProfPowell/http-component" target="_blank">GitHub</a></li>
-        <li><button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button></li>
-      </ul>
-    </div>
-  </nav>
+  <header class="site-header">
+    <nav>
+      <a href="index.html" class="nav-brand">&lt;http-component&gt;</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="demos.html" class="active">Demos</a>
+        <a href="api.html">API</a>
+        <a href="https://github.com/ProfPowell/http-component">GitHub</a>
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">&#127763;</button>
+      </div>
+    </nav>
+  </header>
 
-  <section>
-    <div class="container">
+  <main>
+    <section>
       <h2>Interactive Demos</h2>
 
       <!-- Basic Transaction -->
@@ -29,6 +30,32 @@
         <h3>HTTP Transaction (Request + Response)</h3>
         <p>A complete HTTP exchange showing both request and response in wire format.</p>
         <http-transaction id="demo-transaction"></http-transaction>
+        <code-block language="html">&lt;http-transaction id="demo"&gt;&lt;/http-transaction&gt;
+
+&lt;script&gt;
+  document.getElementById('demo').data = {
+    request: {
+      method: 'GET',
+      url: '/api/users/123',
+      httpVersion: 'HTTP/1.1',
+      headers: {
+        'Host': 'api.example.com',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIs...'
+      }
+    },
+    response: {
+      status: 200,
+      statusText: 'OK',
+      httpVersion: 'HTTP/1.1',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': '94'
+      },
+      body: JSON.stringify({ id: 123, name: 'John Doe', email: 'john@example.com' }, null, 2)
+    }
+  };
+&lt;/script&gt;</code-block>
       </div>
 
       <!-- Request Only -->
@@ -36,6 +63,21 @@
         <h3>Request Only</h3>
         <p>Display just the request portion with method coloring and header highlighting.</p>
         <http-request id="demo-request"></http-request>
+        <code-block language="html">&lt;http-request id="req"&gt;&lt;/http-request&gt;
+
+&lt;script&gt;
+  document.getElementById('req').data = {
+    method: 'POST',
+    url: '/api/users',
+    httpVersion: 'HTTP/1.1',
+    headers: {
+      'Host': 'api.example.com',
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer token...'
+    },
+    body: JSON.stringify({ name: 'Jane Smith', email: 'jane@example.com' }, null, 2)
+  };
+&lt;/script&gt;</code-block>
       </div>
 
       <!-- Response Only -->
@@ -43,6 +85,20 @@
         <h3>Response Only</h3>
         <p>Display just the response with status code coloring and JSON body highlighting.</p>
         <http-response id="demo-response"></http-response>
+        <code-block language="html">&lt;http-response id="res"&gt;&lt;/http-response&gt;
+
+&lt;script&gt;
+  document.getElementById('res').data = {
+    status: 201,
+    statusText: 'Created',
+    httpVersion: 'HTTP/1.1',
+    headers: {
+      'Content-Type': 'application/json',
+      'Location': '/api/users/124'
+    },
+    body: JSON.stringify({ id: 124, name: 'Jane Smith', createdAt: '2025-01-17T10:00:00Z' }, null, 2)
+  };
+&lt;/script&gt;</code-block>
       </div>
 
       <!-- JSON Highlighting -->
@@ -50,6 +106,30 @@
         <h3>JSON Body Highlighting</h3>
         <p>JSON responses are automatically parsed and syntax highlighted.</p>
         <http-transaction id="demo-json"></http-transaction>
+        <code-block language="html">&lt;http-transaction id="demo"&gt;&lt;/http-transaction&gt;
+
+&lt;script&gt;
+  document.getElementById('demo').data = {
+    request: {
+      method: 'GET',
+      url: '/api/products',
+      headers: { 'Accept': 'application/json' }
+    },
+    response: {
+      status: 200,
+      statusText: 'OK',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        products: [
+          { id: 1, name: 'Widget', price: 29.99, inStock: true },
+          { id: 2, name: 'Gadget', price: 49.99, inStock: false }
+        ],
+        total: 2,
+        page: 1
+      }, null, 2)
+    }
+  };
+&lt;/script&gt;</code-block>
       </div>
 
       <!-- HTML Response -->
@@ -57,6 +137,20 @@
         <h3>HTML Response</h3>
         <p>HTML content with tag, attribute, and value highlighting.</p>
         <http-transaction id="demo-html"></http-transaction>
+        <code-block language="html">&lt;!-- Set Content-Type to text/html for automatic HTML highlighting --&gt;
+&lt;http-transaction id="demo"&gt;&lt;/http-transaction&gt;
+
+&lt;script&gt;
+  document.getElementById('demo').data = {
+    request: { method: 'GET', url: '/index.html', headers: { 'Accept': 'text/html' } },
+    response: {
+      status: 200,
+      statusText: 'OK',
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      body: '&lt;!DOCTYPE html&gt;\n&lt;html&gt;\n  &lt;body&gt;&lt;h1&gt;Hello&lt;/h1&gt;&lt;/body&gt;\n&lt;/html&gt;'
+    }
+  };
+&lt;/script&gt;</code-block>
       </div>
 
       <!-- CSS Response -->
@@ -64,6 +158,20 @@
         <h3>CSS Response</h3>
         <p>CSS with selector, property, and value highlighting.</p>
         <http-transaction id="demo-css"></http-transaction>
+        <code-block language="html">&lt;!-- Set Content-Type to text/css for automatic CSS highlighting --&gt;
+&lt;http-transaction id="demo"&gt;&lt;/http-transaction&gt;
+
+&lt;script&gt;
+  document.getElementById('demo').data = {
+    request: { method: 'GET', url: '/styles/main.css', headers: { 'Accept': 'text/css' } },
+    response: {
+      status: 200,
+      statusText: 'OK',
+      headers: { 'Content-Type': 'text/css' },
+      body: '.container { max-width: 1200px; margin: 0 auto; }'
+    }
+  };
+&lt;/script&gt;</code-block>
       </div>
 
       <!-- JavaScript Response -->
@@ -71,6 +179,20 @@
         <h3>JavaScript Response</h3>
         <p>JavaScript with keyword, string, and comment highlighting.</p>
         <http-transaction id="demo-js"></http-transaction>
+        <code-block language="html">&lt;!-- Set Content-Type to application/javascript for JS highlighting --&gt;
+&lt;http-transaction id="demo"&gt;&lt;/http-transaction&gt;
+
+&lt;script&gt;
+  document.getElementById('demo').data = {
+    request: { method: 'GET', url: '/js/app.js', headers: { 'Accept': '*/*' } },
+    response: {
+      status: 200,
+      statusText: 'OK',
+      headers: { 'Content-Type': 'application/javascript' },
+      body: 'const API_URL = "https://api.example.com";\n\nasync function fetchData(id) {\n  const res = await fetch(`${API_URL}/users/${id}`);\n  return res.json();\n}'
+    }
+  };
+&lt;/script&gt;</code-block>
       </div>
 
       <!-- Error Response -->
@@ -78,6 +200,23 @@
         <h3>Error Response (404)</h3>
         <p>Error status codes are highlighted in red/orange colors.</p>
         <http-transaction id="demo-error"></http-transaction>
+        <code-block language="html">&lt;http-transaction id="demo"&gt;&lt;/http-transaction&gt;
+
+&lt;script&gt;
+  document.getElementById('demo').data = {
+    request: {
+      method: 'GET',
+      url: '/api/users/999',
+      headers: { 'Accept': 'application/json' }
+    },
+    response: {
+      status: 404,
+      statusText: 'Not Found',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'User not found', code: 'USER_NOT_FOUND' }, null, 2)
+    }
+  };
+&lt;/script&gt;</code-block>
       </div>
 
       <!-- Waterfall View -->
@@ -85,6 +224,22 @@
         <h3>Waterfall View</h3>
         <p>Multiple requests visualized with timing. Toggle between List, Duration, and Waterfall views.</p>
         <http-waterfall id="demo-waterfall" view="waterfall"></http-waterfall>
+        <code-block language="html">&lt;http-waterfall id="wf" view="waterfall"&gt;&lt;/http-waterfall&gt;
+
+&lt;script&gt;
+  document.getElementById('wf').exchanges = [
+    {
+      request: { method: 'GET', url: '/api/user/profile', headers: {} },
+      response: { status: 200, statusText: 'OK', headers: {}, body: '{}' },
+      timing: { startTime: 0, endTime: 87, duration: 87 }
+    },
+    {
+      request: { method: 'GET', url: '/api/user/posts', headers: {} },
+      response: { status: 200, statusText: 'OK', headers: {}, body: '[]' },
+      timing: { startTime: 20, endTime: 176, duration: 156 }
+    }
+  ];
+&lt;/script&gt;</code-block>
       </div>
 
       <!-- Live Capture -->
@@ -107,6 +262,7 @@
         </div>
 
         <http-waterfall id="demo-capture" capture="true" max-entries="20"></http-waterfall>
+        <code-block language="html">&lt;http-waterfall capture="true" max-entries="20"&gt;&lt;/http-waterfall&gt;</code-block>
       </div>
 
       <!-- Request Builder -->
@@ -114,6 +270,7 @@
         <h3>Request Builder (Explorer)</h3>
         <p>Build and send custom HTTP requests interactively. The explorer is built into http-waterfall.</p>
         <http-waterfall id="demo-explorer" explorer></http-waterfall>
+        <code-block language="html">&lt;http-waterfall explorer&gt;&lt;/http-waterfall&gt;</code-block>
       </div>
 
       <!-- Highlight Feature -->
@@ -121,6 +278,9 @@
         <h3>Highlighting Sections</h3>
         <p>Use the <code>highlight</code> attribute to emphasize specific parts of the request/response.</p>
         <http-transaction id="demo-highlight" highlight="request-line,response-body"></http-transaction>
+        <code-block language="html">&lt;http-transaction
+  highlight="request-line,response-body"&gt;
+&lt;/http-transaction&gt;</code-block>
       </div>
 
       <!-- Box Feature -->
@@ -128,15 +288,39 @@
         <h3>Bordered Sections</h3>
         <p>Use the <code>box</code> attribute to add labeled borders around sections.</p>
         <http-transaction id="demo-box" box="request-headers,response-body"></http-transaction>
+        <code-block language="html">&lt;http-transaction
+  box="request-headers,response-body"&gt;
+&lt;/http-transaction&gt;</code-block>
       </div>
 
-    </div>
-  </section>
+    </section>
 
-  <footer class="footer">
-    <div class="container">
-      <p>HTTP Component is open source. <a href="https://github.com/ProfPowell/http-component">View on GitHub</a></p>
-    </div>
+    <section class="related">
+      <h2>Related Components</h2>
+      <p>Part of the ProfPowell vanilla web components suite:</p>
+      <div class="related-grid">
+        <a href="https://profpowell.github.io/code-block/" class="related-card">
+          <strong>&lt;code-block&gt;</strong>
+          <span>Syntax highlighted code blocks</span>
+        </a>
+        <a href="https://profpowell.github.io/browser-window/" class="related-card">
+          <strong>&lt;browser-window&gt;</strong>
+          <span>Safari-style browser window frames</span>
+        </a>
+        <a href="https://profpowell.github.io/terminal-window/" class="related-card">
+          <strong>&lt;terminal-window&gt;</strong>
+          <span>Interactive terminal emulator</span>
+        </a>
+        <a href="https://profpowell.github.io/browser-console/" class="related-card">
+          <strong>&lt;browser-console&gt;</strong>
+          <span>Console log display component</span>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>MIT License &middot; <a href="https://github.com/ProfPowell/http-component">View on GitHub</a></p>
   </footer>
 
   <script type="module" src="http-component.js"></script>
@@ -144,11 +328,9 @@
     await customElements.whenDefined('http-transaction');
     await customElements.whenDefined('http-waterfall');
 
-    const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-
     // Set theme on all components
     function updateComponentThemes() {
-      const t = document.documentElement.getAttribute('data-theme') || 'light';
+      const t = document.body.classList.contains('dark') ? 'dark' : 'light';
       document.querySelectorAll('http-transaction, http-request, http-response, http-waterfall').forEach(el => {
         el.setAttribute('theme', t);
       });
@@ -385,23 +567,16 @@ async function fetchUserData(userId) {
       }
     };
 
-    updateComponentThemes();
-
-    // Override toggleTheme to also update components
+    // Theme toggle that also syncs to components
     window.toggleTheme = function() {
-      const current = document.documentElement.getAttribute('data-theme');
-      const next = current === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('theme', next);
+      document.body.classList.toggle('dark');
+      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
       updateComponentThemes();
     };
 
     // Initialize theme
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      document.documentElement.setAttribute('data-theme', 'dark');
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark');
     }
     updateComponentThemes();
   </script>
