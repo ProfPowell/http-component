@@ -265,6 +265,19 @@
         <code-block language="html">&lt;http-waterfall capture="true" max-entries="20"&gt;&lt;/http-waterfall&gt;</code-block>
       </div>
 
+      <!-- Page Load -->
+      <div class="demo-section" id="page-load">
+        <h3>Page Load (Resource Timing)</h3>
+        <p>List every request this page itself made: the document, its stylesheet, its scripts, and anything they pulled in. The data comes from the browser's Resource Timing API, so it covers requests made by HTML and CSS, which live capture cannot see.</p>
+
+        <div class="info-box">
+          Each bar is split into phases: queued, DNS, connect, TLS, waiting, and download. Hover a bar for sizes and cache state. Reload the page and the sizes change to <code>cache</code> or <code>revalidated</code>. Rows from other origins show sizes only if that server sends <code>Timing-Allow-Origin</code>.
+        </div>
+
+        <http-waterfall id="demo-resources" resources></http-waterfall>
+        <code-block language="html">&lt;http-waterfall resources&gt;&lt;/http-waterfall&gt;</code-block>
+      </div>
+
       <!-- Request Builder -->
       <div class="demo-section" id="explorer">
         <h3>Request Builder (Explorer)</h3>

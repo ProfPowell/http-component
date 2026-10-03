@@ -55,8 +55,58 @@ export interface HTTPTiming {
   endTime: number;
   /** Request duration (milliseconds) */
   duration: number;
-  /** Optional detailed timing phases */
-  phases?: Record<string, number>;
+  /** Optional detailed timing phases; null when the browser hides them */
+  phases?: ResourcePhases | Record<string, number> | null;
+}
+
+/**
+ * Timing phases of one request, in milliseconds, in the order they happen
+ */
+export interface ResourcePhases {
+  /** Time before the request could start */
+  queue: number;
+  /** Name lookup */
+  dns: number;
+  /** TCP connection */
+  connect: number;
+  /** TLS negotiation */
+  tls: number;
+  /** Request sent until the first response byte */
+  wait: number;
+  /** First response byte until the last */
+  download: number;
+}
+
+/**
+ * What the browser's Resource Timing data reports about one request
+ */
+export interface ResourceFacts {
+  /** The document itself, or something it loaded */
+  kind: 'navigation' | 'resource';
+  /** What asked for it: navigation, link, script, img, css, iframe, fetch, ... */
+  initiatorType: string;
+  /** Short display name: a path, or host and path when cross-origin */
+  label: string;
+  /** Whether the URL is on another origin than the page */
+  crossOrigin: boolean;
+  /** Cross-origin without Timing-Allow-Origin: sizes and phases are hidden */
+  opaque: boolean;
+  /** Negotiated protocol as reported (h2, h3, http/1.1), or '' */
+  protocol: string;
+  /** Bytes on the wire, headers included */
+  transferSize: number;
+  /** Body bytes as sent, after compression */
+  encodedBodySize: number;
+  /** Body bytes after decoding */
+  decodedBodySize: number;
+  /** Where the body came from */
+  cache: 'network' | 'cache' | 'revalidated' | 'unknown';
+  /** 'blocking' or 'non-blocking', when the browser reports it */
+  renderBlocking?: string;
+  /** Media type, when the browser reports it */
+  contentType?: string;
+  /** Content coding, when the browser reports it */
+  contentEncoding?: string;
 }
 
 /**
@@ -65,6 +115,8 @@ export interface HTTPTiming {
 export interface HTTPExchangeWithTiming extends HTTPExchange {
   /** Timing information */
   timing: HTTPTiming;
+  /** Present on exchanges built from Resource Timing entries */
+  resource?: ResourceFacts;
 }
 
 /**
@@ -118,6 +170,10 @@ export declare class HTTPWaterfallElement extends HTMLElement {
   togglePause(): void;
   /** Clear all captured exchanges */
   clearExchanges(): void;
+  /** Start listing the page's own requests from Resource Timing */
+  startResources(): void;
+  /** Stop listing the page's own requests */
+  stopResources(): void;
   /** Toggle the explorer panel */
   toggleExplorer(): void;
 }
@@ -166,6 +222,59 @@ export declare class HTTPInterceptor {
 
 /** Singleton interceptor instance */
 export declare const httpInterceptor: HTTPInterceptor;
+
+/**
+ * Resource Timing source options
+ */
+export interface ResourceSourceOptions {
+  /** URL filter pattern (* wildcard supported) */
+  filter?: string | null;
+  /** Include the document itself (default: true) */
+  navigation?: boolean;
+  /** Leave out fetch and XHR entries; use when the interceptor is also capturing */
+  skipScripted?: boolean;
+}
+
+/**
+ * Reports the page's own requests, from Navigation Timing and Resource Timing
+ */
+export declare class ResourceTimingSource {
+  /** Whether this browser can report resource timing */
+  static readonly supported: boolean;
+  /** Whether the source is reporting */
+  isActive: boolean;
+  /** URL filter pattern */
+  filter: string | null;
+
+  /** Start reporting; earlier entries are delivered first, in batches */
+  start(
+    callback: (exchanges: HTTPExchangeWithTiming[]) => void,
+    options?: ResourceSourceOptions
+  ): void;
+  /** Stop reporting */
+  stop(): void;
+}
+
+/** Convert one Navigation Timing or Resource Timing entry into an exchange */
+export declare function resourceEntryToExchange(
+  entry: PerformanceResourceTiming | Record<string, unknown>,
+  pageOrigin: string
+): HTTPExchangeWithTiming;
+
+/** Decide where a response body came from, using sizes alone */
+export declare function resourceCacheState(
+  entry: PerformanceResourceTiming | Record<string, unknown>,
+  opaque: boolean
+): ResourceFacts['cache'];
+
+/** Describe a URL relative to the page that loaded it */
+export declare function describeResourceUrl(
+  url: string,
+  pageOrigin: string
+): { crossOrigin: boolean; label: string };
+
+/** Test a URL against a filter pattern (* wildcard supported) */
+export declare function matchesResourceFilter(url: string, pattern?: string | null): boolean;
 
 // Extend HTMLElementTagNameMap for TypeScript support
 declare global {

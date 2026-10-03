@@ -14,3 +14,10 @@ export { HTTPWaterfallElement } from './http-waterfall.js';
 
 // Utilities
 export { HTTPInterceptor, httpInterceptor } from './http-interceptor.js';
+export {
+  ResourceTimingSource,
+  resourceEntryToExchange,
+  resourceCacheState,
+  describeResourceUrl,
+  matchesResourceFilter,
+} from './resource-timing.js';

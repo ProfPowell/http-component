@@ -186,7 +186,8 @@
             <tr><td><code>view</code></td><td>string</td><td>View mode: <code>"list"</code>, <code>"duration"</code>, or <code>"waterfall"</code></td></tr>
             <tr><td><code>theme</code></td><td>string</td><td>Color theme: <code>"light"</code>, <code>"dark"</code>, or <code>"auto"</code></td></tr>
             <tr><td><code>capture</code></td><td>boolean</td><td>Enable live capture of fetch/XHR requests</td></tr>
-            <tr><td><code>filter</code></td><td>string</td><td>URL pattern filter for capture (supports * wildcards)</td></tr>
+            <tr><td><code>resources</code></td><td>boolean</td><td>List the page's own requests (document, stylesheets, scripts, images, fonts, frames) from Resource Timing. Defaults to the waterfall view</td></tr>
+            <tr><td><code>filter</code></td><td>string</td><td>URL pattern filter for capture and resources (supports * wildcards)</td></tr>
             <tr><td><code>max-entries</code></td><td>number</td><td>Maximum number of entries to display (default: 100)</td></tr>
             <tr><td><code>explorer</code></td><td>boolean</td><td>Show the request builder panel</td></tr>
           </tbody>
@@ -208,6 +209,22 @@
   response: { status, statusText, headers, body },
   timing: { startTime, endTime, duration }
 }]</code-block>
+                Exchanges listed by the <code>resources</code> attribute also carry timing phases and a <code>resource</code> object:
+                <code-block language="javascript">{
+  timing: {
+    startTime, endTime, duration,
+    phases: { queue, dns, connect, tls, wait, download }  // null when hidden
+  },
+  resource: {
+    kind,             // 'navigation' or 'resource'
+    initiatorType,    // 'link', 'script', 'img', 'css', 'fetch', ...
+    label,            // path, or host and path when cross-origin
+    crossOrigin, opaque,
+    protocol,         // 'h2', 'h3', 'http/1.1'
+    transferSize, encodedBodySize, decodedBodySize,
+    cache             // 'network', 'cache', 'revalidated', 'unknown'
+  }
+}</code-block>
               </td>
             </tr>
             <tr><td><code>view</code></td><td>string</td><td>Get/set current view mode</td></tr>
@@ -223,6 +240,7 @@
             <tr><td><code>request-sent</code></td><td><code>{ method, url, headers, body }</code></td><td>Fired when explorer sends a request</td></tr>
             <tr><td><code>response-received</code></td><td><code>{ request, response, timing }</code></td><td>Fired when explorer receives a response</td></tr>
             <tr><td><code>request-error</code></td><td><code>{ error }</code></td><td>Fired when explorer request fails</td></tr>
+            <tr><td><code>resources-observed</code></td><td><code>{ exchanges }</code></td><td>Fired for each batch of requests the <code>resources</code> attribute adds</td></tr>
           </tbody>
         </table>
 
@@ -236,6 +254,8 @@
             <tr><td><code>stopCapture()</code></td><td>Stop capturing</td></tr>
             <tr><td><code>togglePause()</code></td><td>Pause/resume capturing</td></tr>
             <tr><td><code>clearExchanges()</code></td><td>Clear all captured exchanges</td></tr>
+            <tr><td><code>startResources()</code></td><td>Start listing the page's own requests</td></tr>
+            <tr><td><code>stopResources()</code></td><td>Stop listing the page's own requests</td></tr>
             <tr><td><code>toggleExplorer()</code></td><td>Open/close the request builder panel</td></tr>
           </tbody>
         </table>
@@ -286,6 +306,55 @@ interceptor.stop();</code-block>
             <tr><td><code>maxBodySize</code></td><td>number</td><td>1MB</td><td>Maximum body size to capture</td></tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- ResourceTimingSource -->
+      <div class="api-section" id="resource-timing-source">
+        <h3>ResourceTimingSource (Utility Class)</h3>
+        <p>Reports the requests a page itself made, from the browser's Navigation Timing and Resource Timing data. Used internally by http-waterfall's <code>resources</code> attribute but can be used standalone. It sees what the interceptor cannot (requests made by HTML and CSS) and cannot see what the interceptor can (headers and bodies).</p>
+
+        <h4>Usage</h4>
+        <code-block language="javascript">import { ResourceTimingSource } from '@profpowell/http-component';
+
+const source = new ResourceTimingSource();
+
+// Called with a batch of exchanges, oldest first. Earlier requests arrive first.
+source.start((exchanges) => {
+  for (const { request, resource } of exchanges) {
+    console.log(resource.initiatorType, request.url, resource.transferSize);
+  }
+}, {
+  filter: '/assets/*'
+});
+
+// Later, stop reporting
+source.stop();</code-block>
+
+        <h4>Methods</h4>
+        <table class="api-table">
+          <thead>
+            <tr><th>Method</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>start(callback, options)</code></td><td>Start reporting; entries recorded earlier are delivered first</td></tr>
+            <tr><td><code>stop()</code></td><td>Stop reporting</td></tr>
+          </tbody>
+        </table>
+
+        <h4>Options</h4>
+        <table class="api-table">
+          <thead>
+            <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>filter</code></td><td>string</td><td>null</td><td>URL pattern filter (* wildcard supported)</td></tr>
+            <tr><td><code>navigation</code></td><td>boolean</td><td>true</td><td>Include the document itself</td></tr>
+            <tr><td><code>skipScripted</code></td><td>boolean</td><td>false</td><td>Leave out fetch and XHR entries; use when the interceptor is also capturing</td></tr>
+          </tbody>
+        </table>
+
+        <h4>What the browser hides</h4>
+        <p>Resource Timing reports no headers or bodies. For a cross-origin response it reports sizes and timing phases only when that server sends a <code>Timing-Allow-Origin</code> header; without it the exchange has <code>resource.opaque</code> set, zero sizes, and <code>timing.phases</code> of <code>null</code>. Start and end times are always reported.</p>
       </div>
 
     </section>

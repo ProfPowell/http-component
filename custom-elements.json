@@ -70,6 +70,46 @@
             "name": "httpInterceptor",
             "module": "./http-interceptor.js"
           }
+        },
+        {
+          "kind": "js",
+          "name": "ResourceTimingSource",
+          "declaration": {
+            "name": "ResourceTimingSource",
+            "module": "./resource-timing.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "resourceEntryToExchange",
+          "declaration": {
+            "name": "resourceEntryToExchange",
+            "module": "./resource-timing.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "resourceCacheState",
+          "declaration": {
+            "name": "resourceCacheState",
+            "module": "./resource-timing.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "describeResourceUrl",
+          "declaration": {
+            "name": "describeResourceUrl",
+            "module": "./resource-timing.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "matchesResourceFilter",
+          "declaration": {
+            "name": "matchesResourceFilter",
+            "module": "./resource-timing.js"
+          }
         }
       ]
     },
@@ -1708,6 +1748,63 @@
             },
             {
               "kind": "method",
+              "name": "startResources",
+              "description": "Start listing the requests the page itself made, from the browser's\nNavigation Timing and Resource Timing data: the document, stylesheets,\nscripts, images, fonts, and frames, oldest first. Requests that finish\nlater (a lazy image, a late font) are added as they complete."
+            },
+            {
+              "kind": "method",
+              "name": "stopResources",
+              "description": "Stop listing the page's own requests"
+            },
+            {
+              "kind": "method",
+              "name": "addResourceExchanges",
+              "parameters": [
+                {
+                  "name": "exchanges",
+                  "description": "Exchanges to add",
+                  "type": {
+                    "text": "HTTPExchangeWithTiming[]"
+                  }
+                }
+              ],
+              "description": "Add a batch of exchanges built from Resource Timing entries"
+            },
+            {
+              "kind": "method",
+              "name": "insertChronological",
+              "parameters": [
+                {
+                  "name": "exchanges",
+                  "description": "Exchanges to merge",
+                  "type": {
+                    "text": "HTTPExchangeWithTiming[]"
+                  }
+                }
+              ],
+              "description": "Merge exchanges into the list in start-time order, oldest first"
+            },
+            {
+              "kind": "method",
+              "name": "hasTiming",
+              "parameters": [
+                {
+                  "name": "exchange",
+                  "description": "Exchange to test",
+                  "type": {
+                    "text": "HTTPExchangeWithTiming"
+                  }
+                }
+              ],
+              "description": "True when an exchange carries usable timing. A start time of 0 is valid:\nthe document itself starts at 0.",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              }
+            },
+            {
+              "kind": "method",
               "name": "togglePause",
               "description": "Pause/resume capturing"
             },
@@ -1831,6 +1928,122 @@
                   "name": "totalDuration"
                 }
               ]
+            },
+            {
+              "kind": "method",
+              "name": "renderRowChip",
+              "parameters": [
+                {
+                  "name": "exchange"
+                }
+              ],
+              "description": "The chip at the start of a row: the HTTP method, or for a resource\nexchange, what asked for it"
+            },
+            {
+              "kind": "method",
+              "name": "renderShortUrl",
+              "parameters": [
+                {
+                  "name": "exchange"
+                }
+              ],
+              "description": "The shortened URL for duration and waterfall rows. Resource exchanges\nshow a path, or a host and path when the request left the page's origin."
+            },
+            {
+              "kind": "method",
+              "name": "renderResourceAttributes",
+              "parameters": [
+                {
+                  "name": "exchange"
+                }
+              ],
+              "description": "Data attributes that let a page style or select resource rows"
+            },
+            {
+              "kind": "method",
+              "name": "renderPhases",
+              "parameters": [
+                {
+                  "name": "exchange"
+                }
+              ],
+              "description": "Coloured segments inside a waterfall bar, one per timing phase"
+            },
+            {
+              "kind": "method",
+              "name": "renderPhaseLegend"
+            },
+            {
+              "kind": "method",
+              "name": "getPhaseText",
+              "parameters": [
+                {
+                  "name": "phases"
+                }
+              ],
+              "description": "One line of phase timings, in the order they happen"
+            },
+            {
+              "kind": "method",
+              "name": "getResourceSizeLabel",
+              "parameters": [
+                {
+                  "name": "resource"
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "getResourceSizeTitle",
+              "parameters": [
+                {
+                  "name": "resource"
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "getBodyText",
+              "parameters": [
+                {
+                  "name": "resource"
+                }
+              ],
+              "description": "Body size as sent and as decoded, with the saving when it was compressed"
+            },
+            {
+              "kind": "method",
+              "name": "getResourceTooltip",
+              "parameters": [
+                {
+                  "name": "exchange"
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "renderResourceFacts",
+              "parameters": [
+                {
+                  "name": "exchange"
+                }
+              ],
+              "description": "The expanded detail for a resource exchange: what the browser reports"
+            },
+            {
+              "kind": "method",
+              "name": "getSummaryText",
+              "description": "Request count, plus bytes and cross-origin count when resources are listed"
+            },
+            {
+              "kind": "method",
+              "name": "formatBytes",
+              "parameters": [
+                {
+                  "name": "bytes"
+                }
+              ],
+              "description": "Byte count with one decimal for small kilobyte values"
             },
             {
               "kind": "method",
@@ -2042,6 +2255,22 @@
             },
             {
               "kind": "field",
+              "name": "_resources",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "_resourceSource",
+              "type": {
+                "text": "null"
+              },
+              "default": "null"
+            },
+            {
+              "kind": "field",
               "name": "_explorerOpen",
               "type": {
                 "text": "boolean"
@@ -2075,6 +2304,12 @@
           ],
           "events": [
             {
+              "name": "resources-observed",
+              "type": {
+                "text": "CustomEvent"
+              }
+            },
+            {
               "name": "request-sent",
               "type": {
                 "text": "CustomEvent"
@@ -2102,6 +2337,9 @@
             },
             {
               "name": "capture"
+            },
+            {
+              "name": "resources"
             },
             {
               "name": "filter"
@@ -2154,6 +2392,298 @@
           "declaration": {
             "name": "HTTPWaterfallElement",
             "module": "src/http-waterfall.js"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/resource-timing.js",
+      "declarations": [
+        {
+          "kind": "function",
+          "name": "matchesResourceFilter",
+          "parameters": [
+            {
+              "name": "url",
+              "description": "URL to test",
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "name": "pattern",
+              "description": "Filter pattern",
+              "optional": true,
+              "type": {
+                "text": "string|null"
+              }
+            }
+          ],
+          "description": "Test a URL against a filter pattern. `*` matches any run of characters.\nA pattern with no `*` matches when the URL contains it.",
+          "return": {
+            "type": {
+              "text": "boolean"
+            }
+          }
+        },
+        {
+          "kind": "function",
+          "name": "shortenMiddle",
+          "parameters": [
+            {
+              "name": "text",
+              "description": "Text to shorten",
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "name": "max",
+              "default": "40",
+              "description": "Maximum length",
+              "optional": true,
+              "type": {
+                "text": "number"
+              }
+            }
+          ],
+          "description": "Shorten a long label in the middle, keeping the host and the file name.",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          }
+        },
+        {
+          "kind": "function",
+          "name": "describeResourceUrl",
+          "parameters": [
+            {
+              "name": "url",
+              "description": "Absolute resource URL",
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "name": "pageOrigin",
+              "description": "Origin of the page (location.origin)",
+              "type": {
+                "text": "string"
+              }
+            }
+          ],
+          "description": "Describe a URL relative to the page it was loaded by.",
+          "return": {
+            "type": {
+              "text": "{crossOrigin: boolean, label: string}"
+            }
+          }
+        },
+        {
+          "kind": "variable",
+          "name": "crossOrigin"
+        },
+        {
+          "kind": "function",
+          "name": "resourceCacheState",
+          "parameters": [
+            {
+              "name": "entry",
+              "description": "Resource timing entry (or a plain object shaped like one)",
+              "type": {
+                "text": "Object"
+              }
+            },
+            {
+              "name": "opaque",
+              "description": "Whether sizes are hidden for this entry",
+              "type": {
+                "text": "boolean"
+              }
+            }
+          ],
+          "description": "Decide where a response body came from, using sizes alone.",
+          "return": {
+            "type": {
+              "text": "'network'|'cache'|'revalidated'|'unknown'"
+            }
+          }
+        },
+        {
+          "kind": "function",
+          "name": "resourceEntryToExchange",
+          "parameters": [
+            {
+              "name": "entry",
+              "description": "PerformanceResourceTiming-like object",
+              "type": {
+                "text": "Object"
+              }
+            },
+            {
+              "name": "pageOrigin",
+              "description": "Origin of the page (location.origin)",
+              "type": {
+                "text": "string"
+              }
+            }
+          ],
+          "description": "Convert one Navigation Timing or Resource Timing entry into an exchange.\nPure: reads only its arguments.",
+          "return": {
+            "type": {
+              "text": "Object"
+            }
+          }
+        },
+        {
+          "kind": "variable",
+          "name": "kind"
+        },
+        {
+          "kind": "variable",
+          "name": "initiatorType"
+        },
+        {
+          "kind": "variable",
+          "name": "transferSize"
+        },
+        {
+          "kind": "variable",
+          "name": "encodedBodySize"
+        },
+        {
+          "kind": "variable",
+          "name": "decodedBodySize"
+        },
+        {
+          "kind": "variable",
+          "name": "opaque"
+        },
+        {
+          "kind": "variable",
+          "name": "protocol"
+        },
+        {
+          "kind": "class",
+          "description": "Subscribes to the browser's Navigation Timing and Resource Timing entries\nand reports them as exchanges, in batches.",
+          "name": "ResourceTimingSource",
+          "members": [
+            {
+              "kind": "field",
+              "name": "supported",
+              "static": true,
+              "description": "True when this browser can report resource timing.",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              },
+              "readonly": true
+            },
+            {
+              "kind": "method",
+              "name": "start",
+              "parameters": [
+                {
+                  "name": "callback",
+                  "description": "Called with each batch of exchanges, oldest first",
+                  "type": {
+                    "text": "function(Object[]): void"
+                  }
+                },
+                {
+                  "name": "options",
+                  "default": "{}",
+                  "description": "Configuration options",
+                  "optional": true,
+                  "type": {
+                    "text": "ResourceSourceOptions"
+                  }
+                }
+              ],
+              "description": "Start reporting. Entries recorded before this call are delivered first."
+            },
+            {
+              "kind": "method",
+              "name": "stop",
+              "description": "Stop reporting."
+            },
+            {
+              "kind": "field",
+              "name": "isActive",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "filter",
+              "type": {
+                "text": "string|null"
+              },
+              "default": "null"
+            },
+            {
+              "kind": "field",
+              "name": "_observer",
+              "type": {
+                "text": "PerformanceObserver|null"
+              },
+              "default": "null"
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "matchesResourceFilter",
+          "declaration": {
+            "name": "matchesResourceFilter",
+            "module": "src/resource-timing.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "shortenMiddle",
+          "declaration": {
+            "name": "shortenMiddle",
+            "module": "src/resource-timing.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "describeResourceUrl",
+          "declaration": {
+            "name": "describeResourceUrl",
+            "module": "src/resource-timing.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "resourceCacheState",
+          "declaration": {
+            "name": "resourceCacheState",
+            "module": "src/resource-timing.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "resourceEntryToExchange",
+          "declaration": {
+            "name": "resourceEntryToExchange",
+            "module": "src/resource-timing.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ResourceTimingSource",
+          "declaration": {
+            "name": "ResourceTimingSource",
+            "module": "src/resource-timing.js"
           }
         }
       ]

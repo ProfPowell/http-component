@@ -1,6 +1,6 @@
 {
   "name": "@profpowell/http-component",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Web components for displaying HTTP request/response data",
   "type": "module",
   "main": "dist/http-component.js",

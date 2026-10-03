@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-10-02
+
+### Added
+- **Page-load view from Resource Timing**
+  - `resources` attribute on `<http-waterfall>` lists every request the page itself made: the document, stylesheets, scripts, images, fonts, and frames
+  - Each row shows what asked for it (`doc`, `link`, `script`, `img`, `css`, ...), status, protocol, bytes on the wire against bytes decoded, and whether a cache answered
+  - Waterfall bars are split into timing phases (queued, DNS, connect, TLS, waiting, download), with a legend
+  - Requests that finish after load, such as a lazy image, are added as they complete
+  - `startResources()` and `stopResources()` methods, and a `resources-observed` event
+  - Cross-origin rows are marked, and say so when sizes are hidden for lack of `Timing-Allow-Origin`
+- `ResourceTimingSource` class and `resourceEntryToExchange()` function, exported for standalone use
+- Tests for the conversion and for the `resources` attribute
+
+### Fixed
+- Waterfall view: an exchange that starts at 0 ms is now placed at the left edge. It was ignored when finding the earliest start, which shifted it left of the scale
+- Waterfall view: time markers now sit on the same scale as the bars
+
 ## [0.2.0] - 2025-01-17
 
 ### Added

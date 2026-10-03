@@ -78,6 +78,16 @@ Or via CDN:
 
 The component will automatically capture all `fetch()` and `XMLHttpRequest` calls made by the page.
 
+### Page Load (Resource Timing)
+
+```html
+<http-waterfall resources></http-waterfall>
+```
+
+Add the `resources` attribute to list every request the page itself made: the document, stylesheets, scripts, images, fonts, and frames. The data comes from the browser's Navigation Timing and Resource Timing APIs, so each row shows what asked for it, the protocol, bytes on the wire against bytes decoded, whether a cache answered, and its timing phases (DNS, connect, TLS, waiting, download).
+
+Resource Timing reports no headers or bodies. A cross-origin response shows its sizes and phases only when its server sends `Timing-Allow-Origin`.
+
 ### Request Builder
 
 ```html
@@ -92,6 +102,7 @@ Add the `explorer` attribute to show a built-in request builder panel.
 - **Syntax Highlighting**: Automatic highlighting for JSON, HTML, CSS, and JavaScript
 - **Three View Modes**: List, Duration, and Waterfall views
 - **Live Capture**: Intercept and display real HTTP traffic
+- **Page Load View**: List the page's own requests from Resource Timing, with sizes, cache state, and timing phases
 - **Request Builder**: Build and send HTTP requests interactively
 - **Theme Support**: Light and dark modes with auto-detection
 - **Section Highlighting**: Emphasize specific parts with `highlight` and `box` attributes
@@ -112,7 +123,8 @@ Add the `explorer` attribute to show a built-in request builder panel.
 |-----------|--------|-------------|
 | `view` | `list`, `duration`, `waterfall` | Display mode |
 | `capture` | `true`, `false` | Enable live capture |
-| `filter` | URL pattern | Filter captured requests |
+| `resources` | boolean | List the page's own requests from Resource Timing |
+| `filter` | URL pattern | Filter captured or listed requests |
 | `max-entries` | number | Maximum entries (default: 100) |
 | `explorer` | boolean | Show request builder |
 

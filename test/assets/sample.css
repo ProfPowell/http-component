@@ -1,0 +1,6 @@
+/* Test stylesheet: the background image is discovered only after this file is read */
+.swatch {
+  width: 16px;
+  height: 16px;
+  background-image: url('./bg.svg?no-inline');
+}

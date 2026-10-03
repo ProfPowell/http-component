@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP Component: Resource Timing Test Page</title>
+  <link rel="stylesheet" href="./assets/sample.css">
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 20px; max-width: 1200px; margin: 0 auto; }
+    .test-section { margin-bottom: 40px; }
+  </style>
+</head>
+<body>
+  <h1>Resource Timing Test Harness</h1>
+  <p>
+    <img src="./assets/pixel.svg" width="16" height="16" alt="">
+    <span class="swatch" style="display: inline-block"></span>
+  </p>
+
+  <div class="test-section">
+    <h2>Page load, default view</h2>
+    <http-waterfall id="page-load" resources></http-waterfall>
+  </div>
+
+  <div class="test-section">
+    <h2>Page load, list view, filtered to the test assets</h2>
+    <http-waterfall id="page-load-list" resources view="list" filter="/test/assets/*"></http-waterfall>
+  </div>
+
+  <script type="module" src="../src/http-waterfall.js"></script>
+  <script type="module">
+    await customElements.whenDefined('http-waterfall');
+    // Resource entries arrive from an observer; give the first batch a turn.
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        window.componentsReady = true;
+      }, 100);
+    });
+  </script>
+</body>
+</html>

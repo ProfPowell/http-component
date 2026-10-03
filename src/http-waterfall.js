@@ -1,4 +1,5 @@
 import { HTTPInterceptor } from './http-interceptor.js';
+import { ResourceTimingSource, shortenMiddle } from './resource-timing.js';
 import './http-transaction.js';
 
 /**
@@ -125,6 +126,30 @@ const HTTP_WATERFALL_STYLES = `/** HTTP Waterfall Component Styles */
 .explorer-status.loading { background: var(--status-redirect-bg); color: var(--status-redirect-text); }
 .explorer-status.success { background: var(--status-success-bg); color: var(--status-success-text); }
 .explorer-status.error { background: var(--status-server-error-bg); color: var(--status-server-error-text); }
+/* Resource Timing mode (resources attribute) */
+:host { --phase-queue-bg: #e5e7eb; --phase-dns-bg: #5eead4; --phase-connect-bg: #fdba74; --phase-tls-bg: #c4b5fd; --phase-wait-bg: #86efac; --phase-download-bg: #60a5fa; --initiator-bg: #e5e7eb; --initiator-text: #374151; --cross-origin-text: #9a3412; }
+:host([theme="dark"]) { --phase-queue-bg: #4b5563; --phase-dns-bg: #0f766e; --phase-connect-bg: #c2410c; --phase-tls-bg: #6d28d9; --phase-wait-bg: #047857; --phase-download-bg: #1d4ed8; --initiator-bg: #4b5563; --initiator-text: #f3f4f6; --cross-origin-text: #fdba74; }
+.initiator { background: var(--initiator-bg); color: var(--initiator-text); min-width: 44px; box-sizing: border-box; }
+.exchange-summary.resource { grid-template-columns: 72px 1fr 64px 110px 80px 40px; }
+.url.cross-origin, .url-short.cross-origin { color: var(--cross-origin-text); }
+.timing-bar.status-unknown, .duration-bar.status-unknown { background: var(--phase-queue-bg); border: 1px dashed var(--text-tertiary); }
+.timing-bar.has-phases { background: var(--bg-primary); overflow: hidden; }
+.phases { position: absolute; inset: 0; display: flex; }
+.phase { flex: var(--ms) 1 0; min-width: 0; }
+.phase-queue { background: var(--phase-queue-bg); }
+.phase-dns { background: var(--phase-dns-bg); }
+.phase-connect { background: var(--phase-connect-bg); }
+.phase-tls { background: var(--phase-tls-bg); }
+.phase-wait { background: var(--phase-wait-bg); }
+.phase-download { background: var(--phase-download-bg); }
+.timing-bar.has-phases .duration-label { position: relative; }
+.phase-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 8px 16px; font-size: 12px; color: var(--text-secondary); border-bottom: 1px solid var(--border-color); background: var(--bg-secondary); }
+.phase-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.phase-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 2px; }
+.resource-facts { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 0; font-size: 13px; color: var(--text-primary); }
+.resource-facts dt { color: var(--text-secondary); }
+.resource-facts dd { margin: 0; font-family: 'Courier New', monospace; overflow-wrap: anywhere; }
+.resource-note { margin: 12px 0 0; font-size: 12px; color: var(--text-secondary); }
 `;
 
 /**
@@ -141,6 +166,46 @@ const HTTP_WATERFALL_STYLES = `/** HTTP Waterfall Component Styles */
  * @property {Object} response - HTTP response data
  * @property {HTTPTiming} timing - Timing information
  */
+
+/**
+ * What each Resource Timing initiator means: [short label, explanation]
+ * @const {Object<string, string[]>}
+ */
+const INITIATOR_INFO = {
+  navigation: ['doc', 'The document itself: the URL that was navigated to'],
+  link: ['link', 'Requested by a <link> element, such as a stylesheet or a preload'],
+  script: ['script', 'Requested by a <script> element'],
+  img: ['img', 'Requested by an <img> element'],
+  image: ['image', 'Requested by an SVG <image> element'],
+  css: ['css', 'Requested from inside a stylesheet, such as a font or a background image'],
+  iframe: ['iframe', 'A document loaded into an <iframe>'],
+  fetch: ['fetch', 'Requested by script with fetch()'],
+  xmlhttprequest: ['xhr', 'Requested by script with XMLHttpRequest'],
+  beacon: ['beacon', 'Sent by script with navigator.sendBeacon()'],
+  video: ['video', 'Requested by a <video> element'],
+  audio: ['audio', 'Requested by an <audio> element'],
+  other: ['other', 'Requested by the browser itself, such as the favicon'],
+};
+
+/**
+ * Timing phases in the order they happen: [key, label]
+ * @const {string[][]}
+ */
+const PHASES = [
+  ['queue', 'Queued'],
+  ['dns', 'DNS'],
+  ['connect', 'Connect'],
+  ['tls', 'TLS'],
+  ['wait', 'Waiting'],
+  ['download', 'Download'],
+];
+
+const CACHE_TEXT = {
+  network: 'fetched over the network',
+  cache: 'served from cache; nothing was sent',
+  revalidated: 'revalidated; the server answered 304 and the cached body was reused',
+  unknown: 'not exposed',
+};
 
 /**
  * HTTPWaterfallElement - Web component for displaying multiple HTTP exchanges
@@ -163,6 +228,10 @@ const HTTP_WATERFALL_STYLES = `/** HTTP Waterfall Component Styles */
  * @example
  * // Live capture mode
  * <http-waterfall capture="true" filter="/api/*" theme="dark"></http-waterfall>
+ *
+ * @example
+ * // Page-load mode: every request the page itself made, from Resource Timing
+ * <http-waterfall resources></http-waterfall>
  */
 class HTTPWaterfallElement extends HTMLElement {
   constructor() {
@@ -176,6 +245,8 @@ class HTTPWaterfallElement extends HTMLElement {
     this._maxEntries = 100;
     this._isPaused = false;
     this._interceptor = null;
+    this._resources = false;
+    this._resourceSource = null;
 
     // Explorer (request builder) state
     this._explorerOpen = false;
@@ -192,7 +263,16 @@ class HTTPWaterfallElement extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['view', 'requests', 'capture', 'filter', 'max-entries', 'theme', 'explorer'];
+    return [
+      'view',
+      'requests',
+      'capture',
+      'resources',
+      'filter',
+      'max-entries',
+      'theme',
+      'explorer',
+    ];
   }
 
   /**
@@ -233,11 +313,17 @@ class HTTPWaterfallElement extends HTMLElement {
     if (this._capture) {
       this.startCapture();
     }
+
+    // Start listing the page's own requests if enabled
+    if (this._resources) {
+      this.startResources();
+    }
   }
 
   disconnectedCallback() {
     // Stop capturing when component is removed
     this.stopCapture();
+    this.stopResources();
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -257,10 +343,24 @@ class HTTPWaterfallElement extends HTMLElement {
         } else {
           this.stopCapture();
         }
+      } else if (name === 'resources') {
+        this._resources = newValue !== null && newValue !== 'false';
+        // During upgrade the attributes arrive one at a time, before
+        // connectedCallback. Wait for it, so filter and max-entries are read
+        // before the first entries are delivered.
+        if (this._resources && this._viewContainer) {
+          this.startResources();
+        } else {
+          this.stopResources();
+        }
+        this.renderExplorer();
       } else if (name === 'filter') {
         this._filter = newValue;
         if (this._interceptor) {
           this._interceptor.filter = newValue;
+        }
+        if (this._resourceSource) {
+          this._resourceSource.filter = newValue;
         }
       } else if (name === 'max-entries') {
         this._maxEntries = parseInt(newValue, 10) || 100;
@@ -378,6 +478,73 @@ class HTTPWaterfallElement extends HTMLElement {
   }
 
   /**
+   * Start listing the requests the page itself made, from the browser's
+   * Navigation Timing and Resource Timing data: the document, stylesheets,
+   * scripts, images, fonts, and frames, oldest first. Requests that finish
+   * later (a lazy image, a late font) are added as they complete.
+   * @memberof HTTPWaterfallElement
+   */
+  startResources() {
+    if (this._resourceSource) return; // Already listing
+
+    // A page load reads as a timeline unless a view was asked for
+    if (!this.hasAttribute('view') && this._view !== 'waterfall') {
+      this._view = 'waterfall';
+      this.renderToolbar();
+    }
+
+    this._resourceSource = new ResourceTimingSource();
+    this._resourceSource.start(exchanges => this.addResourceExchanges(exchanges), {
+      filter: this._filter,
+      // The interceptor already reports fetch and XHR, with headers and bodies
+      skipScripted: this._capture,
+    });
+  }
+
+  /**
+   * Stop listing the page's own requests
+   * @memberof HTTPWaterfallElement
+   */
+  stopResources() {
+    if (this._resourceSource) {
+      this._resourceSource.stop();
+      this._resourceSource = null;
+    }
+  }
+
+  /**
+   * Add a batch of exchanges built from Resource Timing entries
+   * @param {HTTPExchangeWithTiming[]} exchanges - Exchanges to add
+   */
+  addResourceExchanges(exchanges) {
+    this.insertChronological(exchanges);
+    this.dispatchEvent(new CustomEvent('resources-observed', { detail: { exchanges } }));
+  }
+
+  /**
+   * Merge exchanges into the list in start-time order, oldest first
+   * @param {HTTPExchangeWithTiming[]} exchanges - Exchanges to merge
+   */
+  insertChronological(exchanges) {
+    const merged = this._exchanges.concat(exchanges);
+    merged.sort((a, b) => (a.timing?.startTime || 0) - (b.timing?.startTime || 0));
+    this._exchanges = merged.slice(0, this._maxEntries);
+    this.renderView();
+    this.updateRequestCount();
+  }
+
+  /**
+   * True when an exchange carries usable timing. A start time of 0 is valid:
+   * the document itself starts at 0.
+   * @param {HTTPExchangeWithTiming} exchange - Exchange to test
+   * @returns {boolean} Whether the exchange can be placed on a timeline
+   */
+  hasTiming(exchange) {
+    const timing = exchange.timing;
+    return !!timing && Number.isFinite(timing.startTime) && timing.endTime > 0;
+  }
+
+  /**
    * Pause/resume capturing
    */
   togglePause() {
@@ -410,7 +577,7 @@ class HTTPWaterfallElement extends HTMLElement {
   areRequestsClustered() {
     if (this._exchanges.length < 2) return false;
 
-    const times = this._exchanges.map(e => e.timing?.startTime || 0).filter(t => t > 0);
+    const times = this._exchanges.filter(e => this.hasTiming(e)).map(e => e.timing.startTime);
 
     if (times.length === 0) return false;
 
@@ -425,6 +592,11 @@ class HTTPWaterfallElement extends HTMLElement {
    * Get smart default view based on context
    */
   getSmartDefaultView() {
+    // A page load is a timeline
+    if (this._resources) {
+      return 'waterfall';
+    }
+
     // Live capture always defaults to duration (independent requests)
     if (this._capture) {
       return 'duration';
@@ -442,6 +614,12 @@ class HTTPWaterfallElement extends HTMLElement {
    * Add a captured exchange
    */
   addCapturedExchange(exchange) {
+    // Alongside the page's own requests, keep one timeline in start order
+    if (this._resources) {
+      this.insertChronological([exchange]);
+      return;
+    }
+
     // Add to beginning of array (most recent first)
     this._exchanges.unshift(exchange);
 
@@ -521,7 +699,7 @@ class HTTPWaterfallElement extends HTMLElement {
         </div>
         ${captureControls}
         <div class="info">
-          ${this._exchanges.length} request${this._exchanges.length !== 1 ? 's' : ''}
+          ${this.getSummaryText()}
         </div>
       </div>
     `;
@@ -557,6 +735,25 @@ class HTTPWaterfallElement extends HTMLElement {
 
     const statusClass = this.getStatusClass(status);
 
+    if (exchange.resource) {
+      const resource = exchange.resource;
+      return `
+      <div class="exchange-row ${isExpanded ? 'expanded' : ''}" data-index="${index}" data-initiator="${this.escapeHtml(resource.initiatorType)}" data-cross-origin="${resource.crossOrigin}">
+        <div class="exchange-summary resource">
+          ${this.renderRowChip(exchange)}
+          <span class="url ${resource.crossOrigin ? 'cross-origin' : ''}" title="${this.escapeHtml(url)}">${this.escapeHtml(resource.label)}</span>
+          <span class="status ${statusClass}">${status || '—'}</span>
+          <span class="size" title="${this.escapeHtml(this.getResourceSizeTitle(resource))}">${this.getResourceSizeLabel(resource)}</span>
+          <span class="duration">${duration}ms</span>
+          <button class="expand-btn" data-index="${index}">
+            ${isExpanded ? '▼' : '▶'}
+          </button>
+        </div>
+        ${isExpanded ? this.renderExchangeDetail(exchange) : ''}
+      </div>
+    `;
+    }
+
     return `
       <div class="exchange-row ${isExpanded ? 'expanded' : ''}" data-index="${index}">
         <div class="exchange-summary">
@@ -575,6 +772,15 @@ class HTTPWaterfallElement extends HTMLElement {
   }
 
   renderExchangeDetail(exchange) {
+    // Resource Timing has no headers or bodies to show in wire format
+    if (exchange.resource) {
+      return `
+      <div class="exchange-detail">
+        ${this.renderResourceFacts(exchange)}
+      </div>
+    `;
+    }
+
     const { request, response } = exchange;
     // Create a unique ID for this detail element
     const detailId = `detail-${Math.random().toString(36).substr(2, 9)}`;
@@ -638,21 +844,24 @@ class HTTPWaterfallElement extends HTMLElement {
     const isExpanded = this._expandedRows.has(index);
 
     const statusClass = this.getStatusClass(status);
-    const tooltip = `${method} ${url}\nStatus: ${status} ${statusText}\nDuration: ${duration}ms`;
+    const barClass = statusClass || (exchange.resource ? 'status-unknown' : '');
+    const tooltip = exchange.resource
+      ? this.getResourceTooltip(exchange)
+      : `${method} ${url}\nStatus: ${status} ${statusText}\nDuration: ${duration}ms`;
 
     return `
-      <div class="duration-row-container ${isExpanded ? 'expanded' : ''}">
+      <div class="duration-row-container ${isExpanded ? 'expanded' : ''}"${this.renderResourceAttributes(exchange)}>
         <div class="duration-row">
           <div class="request-info">
-            <span class="method method-${method.toLowerCase()}">${method}</span>
-            <span class="url-short" title="${this.escapeHtml(url)}">${this.escapeHtml(this.shortenUrl(url))}</span>
-            <span class="status ${statusClass}">${status}</span>
+            ${this.renderRowChip(exchange)}
+            ${this.renderShortUrl(exchange)}
+            <span class="status ${statusClass}">${status || (exchange.resource ? '—' : status)}</span>
             <button class="expand-btn" data-index="${index}">
               ${isExpanded ? '▼' : '▶'}
             </button>
           </div>
           <div class="duration-bar-area">
-            <div class="duration-bar ${statusClass}"
+            <div class="duration-bar ${barClass}"
                  title="${this.escapeHtml(tooltip)}"
                  style="--duration: ${duration}; --max-duration: ${maxDuration}">
               <span class="duration-label">${duration}ms</span>
@@ -678,20 +887,22 @@ class HTTPWaterfallElement extends HTMLElement {
     }
 
     // Calculate timing metadata
-    const startTimes = this._exchanges.map(e => e.timing?.startTime || 0).filter(t => t > 0);
-    const endTimes = this._exchanges.map(e => e.timing?.endTime || 0).filter(t => t > 0);
+    const timed = this._exchanges.filter(e => this.hasTiming(e));
 
-    if (startTimes.length === 0) {
+    if (timed.length === 0) {
       return '<div class="empty">No timing data available for waterfall view</div>';
     }
 
-    const baseTime = Math.min(...startTimes);
-    const maxTime = Math.max(...endTimes);
-    const totalDuration = maxTime - baseTime;
+    const baseTime = Math.min(...timed.map(e => e.timing.startTime));
+    const maxTime = Math.max(...timed.map(e => e.timing.endTime));
+    // Never zero: the bars divide by it
+    const totalDuration = Math.max(maxTime - baseTime, 1);
+    const hasPhases = timed.some(e => e.timing.phases);
 
     return `
       <div class="waterfall-view">
         ${this.renderTimelineHeader(totalDuration)}
+        ${hasPhases ? this.renderPhaseLegend() : ''}
         <div class="waterfall-rows">
           ${this._exchanges
             .map((exchange, index) =>
@@ -708,9 +919,15 @@ class HTTPWaterfallElement extends HTMLElement {
     const markers = [];
     const positions = [0, 0.25, 0.5, 0.75, 1.0];
 
+    // Bars are drawn across (100% - 32px), inset 16px. Place each marker on
+    // the same scale so a label sits over the time it names.
     for (let i = 0; i < positions.length; i++) {
       const time = Math.round(totalDuration * positions[i]);
-      markers.push(`<span class="time-marker">${time}ms</span>`);
+      const place =
+        positions[i] === 1
+          ? 'left: auto; right: 16px;'
+          : `left: calc(16px + (100% - 32px) * ${positions[i]});`;
+      markers.push(`<span class="time-marker" style="${place}">${time}ms</span>`);
     }
 
     return `
@@ -734,23 +951,28 @@ class HTTPWaterfallElement extends HTMLElement {
     // Calculate offset from base time
     const offset = startTime - baseTime;
     const statusClass = this.getStatusClass(status);
-    const tooltip = `${method} ${url}\nStatus: ${status} ${statusText}\nStart: ${offset}ms\nDuration: ${duration}ms`;
+    const barClass = statusClass || (exchange.resource ? 'status-unknown' : '');
+    const tooltip = exchange.resource
+      ? this.getResourceTooltip(exchange)
+      : `${method} ${url}\nStatus: ${status} ${statusText}\nStart: ${offset}ms\nDuration: ${duration}ms`;
+    const phases = this.renderPhases(exchange);
 
     return `
-      <div class="waterfall-row-container ${isExpanded ? 'expanded' : ''}">
+      <div class="waterfall-row-container ${isExpanded ? 'expanded' : ''}"${this.renderResourceAttributes(exchange)}>
         <div class="waterfall-row">
           <div class="request-info">
-            <span class="method method-${method.toLowerCase()}">${method}</span>
-            <span class="url-short" title="${this.escapeHtml(url)}">${this.escapeHtml(this.shortenUrl(url))}</span>
-            <span class="status ${statusClass}">${status}</span>
+            ${this.renderRowChip(exchange)}
+            ${this.renderShortUrl(exchange)}
+            <span class="status ${statusClass}">${status || (exchange.resource ? '—' : status)}</span>
             <button class="expand-btn" data-index="${index}">
               ${isExpanded ? '▼' : '▶'}
             </button>
           </div>
           <div class="timing-area">
-            <div class="timing-bar ${statusClass}"
+            <div class="timing-bar ${barClass} ${phases ? 'has-phases' : ''}"
                  title="${this.escapeHtml(tooltip)}"
                  style="--start-offset: ${offset}; --duration: ${duration}; --total-duration: ${totalDuration}">
+              ${phases}
               <span class="duration-label">${duration}ms</span>
             </div>
           </div>
@@ -758,6 +980,176 @@ class HTTPWaterfallElement extends HTMLElement {
         ${isExpanded ? this.renderExchangeDetail(exchange) : ''}
       </div>
     `;
+  }
+
+  // ===== Resource Timing rendering =====
+
+  /**
+   * The chip at the start of a row: the HTTP method, or for a resource
+   * exchange, what asked for it
+   */
+  renderRowChip(exchange) {
+    if (!exchange.resource) {
+      const method = exchange.request?.method || '?';
+      return `<span class="method method-${method.toLowerCase()}">${method}</span>`;
+    }
+
+    const type = exchange.resource.initiatorType;
+    const [label, meaning] = INITIATOR_INFO[type] || [type, `Requested by: ${type}`];
+    return `<span class="method initiator" title="${this.escapeHtml(meaning)}">${this.escapeHtml(label)}</span>`;
+  }
+
+  /**
+   * The shortened URL for duration and waterfall rows. Resource exchanges
+   * show a path, or a host and path when the request left the page's origin.
+   */
+  renderShortUrl(exchange) {
+    const url = exchange.request?.url || '';
+    if (!exchange.resource) {
+      return `<span class="url-short" title="${this.escapeHtml(url)}">${this.escapeHtml(this.shortenUrl(url))}</span>`;
+    }
+
+    const { label, crossOrigin } = exchange.resource;
+    return `<span class="url-short ${crossOrigin ? 'cross-origin' : ''}" title="${this.escapeHtml(url)}">${this.escapeHtml(shortenMiddle(label, 28))}</span>`;
+  }
+
+  /** Data attributes that let a page style or select resource rows */
+  renderResourceAttributes(exchange) {
+    if (!exchange.resource) return '';
+    const { initiatorType, crossOrigin } = exchange.resource;
+    return ` data-initiator="${this.escapeHtml(initiatorType)}" data-cross-origin="${crossOrigin}"`;
+  }
+
+  /** Coloured segments inside a waterfall bar, one per timing phase */
+  renderPhases(exchange) {
+    const phases = exchange.timing?.phases;
+    if (!phases) return '';
+
+    const segments = PHASES.filter(([key]) => phases[key] > 0);
+    if (segments.length === 0) return '';
+
+    return `<span class="phases" aria-hidden="true">${segments
+      .map(([key]) => `<span class="phase phase-${key}" style="--ms: ${phases[key]}"></span>`)
+      .join('')}</span>`;
+  }
+
+  renderPhaseLegend() {
+    return `
+      <div class="phase-legend">
+        ${PHASES.map(([key, label]) => `<span><i class="phase-${key}"></i>${label}</span>`).join('')}
+      </div>
+    `;
+  }
+
+  /** One line of phase timings, in the order they happen */
+  getPhaseText(phases) {
+    return (
+      PHASES.map(([key, label]) => `${label} ${Math.round(phases[key])}`).join(' · ') + ' (ms)'
+    );
+  }
+
+  getResourceSizeLabel(resource) {
+    if (resource.opaque) return 'hidden';
+    if (resource.cache === 'cache') return 'cache';
+    if (resource.cache === 'revalidated') return 'revalidated';
+    return this.formatBytes(resource.transferSize);
+  }
+
+  getResourceSizeTitle(resource) {
+    if (resource.opaque) {
+      return 'Cross-origin response without Timing-Allow-Origin: sizes are not exposed';
+    }
+    return `On the wire: ${this.formatBytes(resource.transferSize)}\n${this.getBodyText(resource)}`;
+  }
+
+  /** Body size as sent and as decoded, with the saving when it was compressed */
+  getBodyText(resource) {
+    const { encodedBodySize: sent, decodedBodySize: decoded } = resource;
+    let text = `Body: ${this.formatBytes(sent)} sent, ${this.formatBytes(decoded)} decoded`;
+    if (sent > 0 && sent < decoded) {
+      text += ` (${Math.round((1 - sent / decoded) * 100)}% smaller)`;
+    }
+    return text;
+  }
+
+  getResourceTooltip(exchange) {
+    const { request, response, timing, resource } = exchange;
+    const [, meaning] = INITIATOR_INFO[resource.initiatorType] || ['', resource.initiatorType];
+    const lines = [
+      request.url,
+      meaning,
+      `Status: ${response.status || 'not reported'}${request.httpVersion ? ` over ${request.httpVersion}` : ''}`,
+      `Start: ${timing.startTime}ms, duration: ${timing.duration}ms`,
+    ];
+    if (resource.opaque) {
+      lines.push('Sizes and phases hidden: cross-origin without Timing-Allow-Origin');
+    } else {
+      lines.push(`On the wire: ${this.formatBytes(resource.transferSize)}`);
+      lines.push(this.getBodyText(resource));
+      lines.push(`Cache: ${CACHE_TEXT[resource.cache]}`);
+      if (timing.phases) lines.push(this.getPhaseText(timing.phases));
+    }
+    return lines.join('\n');
+  }
+
+  /** The expanded detail for a resource exchange: what the browser reports */
+  renderResourceFacts(exchange) {
+    const { request, response, timing, resource } = exchange;
+    const [, meaning] = INITIATOR_INFO[resource.initiatorType] || ['', resource.initiatorType];
+    const hidden = 'hidden: cross-origin response without Timing-Allow-Origin';
+
+    const facts = [
+      ['URL', request.url],
+      ['Requested by', meaning],
+      ['Origin', resource.crossOrigin ? 'cross-origin' : 'same origin as the page'],
+      ['Protocol', request.httpVersion || 'not reported'],
+      ['Status', response.status || 'not reported'],
+    ];
+    if (resource.contentType) facts.push(['Content type', resource.contentType]);
+    if (resource.contentEncoding) facts.push(['Content encoding', resource.contentEncoding]);
+    facts.push(
+      [
+        'On the wire',
+        resource.opaque ? hidden : `${this.formatBytes(resource.transferSize)} (headers and body)`,
+      ],
+      ['Body', resource.opaque ? hidden : this.getBodyText(resource).replace('Body: ', '')],
+      ['Cache', CACHE_TEXT[resource.cache]]
+    );
+    if (resource.renderBlocking) facts.push(['Render blocking', resource.renderBlocking]);
+    facts.push(
+      ['Timing', `starts at ${timing.startTime} ms, takes ${timing.duration} ms`],
+      ['Phases', timing.phases ? this.getPhaseText(timing.phases) : hidden]
+    );
+
+    return `
+      <dl class="resource-facts">
+        ${facts.map(([name, value]) => `<dt>${name}</dt><dd>${this.escapeHtml(String(value))}</dd>`).join('')}
+      </dl>
+      <p class="resource-note">From the browser's Resource Timing data, which reports no headers or bodies. The Network panel in DevTools shows those.</p>
+    `;
+  }
+
+  /** Request count, plus bytes and cross-origin count when resources are listed */
+  getSummaryText() {
+    const count = this._exchanges.length;
+    let text = `${count} request${count !== 1 ? 's' : ''}`;
+
+    const resources = this._exchanges.filter(e => e.resource).map(e => e.resource);
+    if (resources.length > 0) {
+      const bytes = resources.reduce((sum, r) => sum + r.transferSize, 0);
+      const crossOrigin = resources.filter(r => r.crossOrigin).length;
+      text += ` · ${this.formatBytes(bytes)} transferred`;
+      if (crossOrigin > 0) text += ` · ${crossOrigin} cross-origin`;
+    }
+    return text;
+  }
+
+  /** Byte count with one decimal for small kilobyte values */
+  formatBytes(bytes) {
+    if (bytes < 1024) return `${bytes} B`;
+    const kb = bytes / 1024;
+    if (kb < 1024) return `${kb < 100 ? kb.toFixed(1) : Math.round(kb)} KB`;
+    return `${(kb / 1024).toFixed(1)} MB`;
   }
 
   calculateTimeInterval(totalDuration) {
@@ -802,7 +1194,7 @@ class HTTPWaterfallElement extends HTMLElement {
   updateRequestCount() {
     const infoElement = this.shadowRoot.querySelector('.info');
     if (infoElement) {
-      infoElement.textContent = `${this._exchanges.length} request${this._exchanges.length !== 1 ? 's' : ''}`;
+      infoElement.textContent = this.getSummaryText();
     }
   }
 
@@ -861,6 +1253,12 @@ class HTTPWaterfallElement extends HTMLElement {
    */
   renderExplorer() {
     if (!this._explorerContainer) return;
+
+    // A page-load listing has no use for the request builder unless asked for
+    if (this._resources && !this.hasAttribute('explorer')) {
+      this._explorerContainer.innerHTML = '';
+      return;
+    }
 
     this._explorerContainer.innerHTML = `
       <div class="explorer-panel">

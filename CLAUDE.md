@@ -40,7 +40,8 @@ http-component/
 │   ├── http-response.js     - Response display (status, headers, body)
 │   ├── http-transaction.js  - Request + Response pair (main component)
 │   ├── http-waterfall.js    - Multiple requests with list/timeline + explorer
-│   └── http-interceptor.js  - Utility for live capture
+│   ├── http-interceptor.js  - Utility for live capture (fetch and XHR)
+│   └── resource-timing.js   - Page-load source (Navigation and Resource Timing)
 ├── dist/                    - Built output (npm run build)
 ├── docs/                    - Documentation site
 │   ├── index.html          - Home page
@@ -49,8 +50,11 @@ http-component/
 │   └── styles.css          - Shared styles
 ├── test/                    - Playwright tests
 │   ├── test-page.html      - Test harness
+│   ├── resources-page.html - Test harness for the resources attribute
+│   ├── assets/             - Small files the resources harness loads
 │   ├── http-transaction.spec.js
-│   └── http-waterfall.spec.js
+│   ├── http-waterfall.spec.js
+│   └── resource-timing.spec.js
 ├── http-component.d.ts      - TypeScript definitions
 ├── vite.config.js           - Vite build configuration
 ├── playwright.config.js     - Playwright test configuration
@@ -125,6 +129,7 @@ http-waterfall (multiple exchanges)
 - **Syntax Highlighting**: JSON, HTML, CSS, JavaScript
 - **Theme Support**: Light/dark modes with auto-detection
 - **Live Capture**: Intercept fetch() and XMLHttpRequest
+- **Page Load View**: `resources` attribute lists the page's own requests from Resource Timing (no headers or bodies; sizes, cache state, and timing phases instead)
 - **Request Builder**: Built into http-waterfall (explorer attribute)
 - **Highlighting/Boxing**: Emphasize specific sections via attributes
 
