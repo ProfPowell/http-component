@@ -30,7 +30,7 @@ export default defineConfig({
 
   webServer: {
     command: 'npx vite --port 5174',
-    url: 'http://localhost:5174',
+    url: 'http://localhost:5174/test/test-page.html',
     reuseExistingServer: true,
     timeout: 30000,
   },
